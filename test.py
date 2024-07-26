@@ -54,10 +54,13 @@ G.number_of_nodes()
 NB_GENES = 7
 AUTO_RG = 0.1
 DUO_RG = 0.2
-test = simulation(["massAction","Hills"], (0,20), 7, 0.1, 0.2)
+test = simulation(["massAction","Hills"], (0,0.20), 7, 0.1, 0.2)
 G = test["Graph"]
+Coeff = test["Coefficients"]
 print(test)
-simulation(["massAction","Hills"],(0,20),Graph=G,plot=True,saveName="1.png")
-simulation(["massAction","Hills"],(0,20),Graph=G,plot=True,saveName="2.png")
-simulation(["massAction"],(0,20),5,AUTO_RG,DUO_RG,plot=True,saveName="3.png")
-simulation(["Hills"],(0,20),5,AUTO_RG,DUO_RG,plot=True,saveName="4.png")
+simulation(["massAction","Hills"],(0,0.20),Graph=G,plot=True,saveName="1.png",Coeff=Coeff)
+simulation(["massAction","Hills"],(0,0.20),Graph=G,plot=True,saveName="1bis.png",Coeff=Coeff)
+simulation(["massAction","Hills"],(0,0.20),Graph=G,plot=True,saveName="2.png")
+simulation(["massAction"],(0,0.20),5,AUTO_RG,DUO_RG,plot=True,saveName="3.png")
+simulation(["Hills"],(0,0.20),5,AUTO_RG,DUO_RG,plot=True,saveName="4.png")
+

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 from scipy.integrate import solve_ivp
 from reseauGenes.RGGCreation import *
+from reseauGenes.coefficientFinder import *
 from systemeEDO.massAction import *
 from systemeEDO.Hills import *
 
 
-def simulation(ODEs, T, genesNb=None, autoRG=None, duoRG=None, Graph=None, plot=False, saveName=None):
+def simulation(ODEs, T, genesNb=None, autoRG=None, duoRG=None, Graph=None, Coeff=None, plot=False, saveName=None):
 
     def otherODE(L):
         for ode in L:
@@ -25,33 +26,38 @@ def simulation(ODEs, T, genesNb=None, autoRG=None, duoRG=None, Graph=None, plot=
     else:
         M = np.transpose(nx.to_numpy_array(Graph))
         genesNb = Graph.number_of_nodes()
+    
+    if Coeff is None:
+        Coeff = getCoefficient(genesNb)
+    
         
-    res = {}
+    resDict = {}
     t0, tf = T
-    G0 = [2]*genesNb
+    G0 = Coeff["mRNAAvg"]
     kk = [1]*genesNb
-    res["Graph"] = Graph
-    res["AdjMatrice"] = M
-    res["genesNb"], res["autoRG"], res["duoRG"] = genesNb, autoRG, duoRG
-    res["meanClustering"] = meanClustering(Graph)
+    resDict["Graph"] = Graph
+    resDict["AdjMatrice"] = M
+    resDict["Coefficients"] = Coeff
+    resDict["genesNb"], resDict["autoRG"], resDict["duoRG"] = genesNb, autoRG, duoRG
+    resDict["meanClustering"] = meanClustering(Graph)
 
     if "massAction" in ODEs:
-        K = np.random.random((genesNb, genesNb))
+        K = np.resize(Coeff["TranslationsRate"],(genesNb,genesNb))
         Ma = MaMatrice(M, K)
         
         equation = lambda t,G: masseAction(t, G, Ma)     
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.05)
-        res["massActionY"] = solution.y
-        res["massActionX"] = solution.t
+        resDict["massActionY"] = solution.y
+        resDict["massActionX"] = solution.t
     
     if "Hills" in ODEs:
         equation = lambda t,G: HillEquation(t, G, M, kk*2, kk, kk, kk, 1)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        res["HillsY"] = solution.y
-        res["HillsX"] = solution.t
+        resDict["HillsY"] = solution.y
+        resDict["HillsX"] = solution.t
 
     if plot:
-        plt.clf()
+        plt.figure()
         edges = Graph.edges()
         colors = [Graph[u][v]['color'] for u,v in edges]
         font = {'family':'serif','color':'darkred','size':10}
@@ -72,7 +78,7 @@ def simulation(ODEs, T, genesNb=None, autoRG=None, duoRG=None, Graph=None, plot=
             print(len(ODEs))
             plt.subplot(len(ODEs),2,2)
             for solGenes in range(genesNb):
-                plt.plot(res["massActionX"], res["massActionY"][solGenes], label=solGenes)
+                plt.plot(resDict["massActionX"], resDict["massActionY"][solGenes], label=solGenes)
             plt.xlabel("time", fontdict=font)
             plt.ylabel("Genes concentrations", fontdict=font)
             plt.title("Mass Action law simulation")
@@ -81,7 +87,7 @@ def simulation(ODEs, T, genesNb=None, autoRG=None, duoRG=None, Graph=None, plot=
         if "Hills" in ODEs:
             plt.subplot(len(ODEs),2,2*len(ODEs))
             for solGenes in range(genesNb):
-                plt.plot(res["HillsX"], res["HillsY"][solGenes], label=solGenes)
+                plt.plot(resDict["HillsX"], resDict["HillsY"][solGenes], label=solGenes)
             plt.xlabel("time", fontdict=font)
             plt.ylabel("Genes concentrations", fontdict=font)
             plt.title("Hills law Simulation")
@@ -93,14 +99,14 @@ def simulation(ODEs, T, genesNb=None, autoRG=None, duoRG=None, Graph=None, plot=
         else :
             plt.savefig(saveName)
 
-    return res
+    return resDict
   
 
 def main():
     NB_GENES = 7
     AUTO_RG = 0.1
     DUO_RG = 0.2
-    simulation(["massAction","Hills"],(0,20),NB_GENES,AUTO_RG,DUO_RG,plot=True)
+    simulation(["massAction","Hills"],(0,0.2),NB_GENES,AUTO_RG,DUO_RG,plot=True)
 
 
 if __name__ == "__main__":
