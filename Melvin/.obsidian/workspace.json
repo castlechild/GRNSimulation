@@ -1,0 +1,167 @@
+{
+  "main": {
+    "id": "5ee1df4e8493bd14",
+    "type": "split",
+    "children": [
+      {
+        "id": "0058f5df9b8f077e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ab8b5f62e67d5c5e",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "0c1b4217577cc858",
+    "type": "split",
+    "children": [
+      {
+        "id": "cb4579d5e4a996ce",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ce794df2f817b19d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "be023bd27c31c7d4",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "42ab53680be32a9a",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "ed21fad68c22fda8",
+    "type": "split",
+    "children": [
+      {
+        "id": "3ef039075204532a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c4b9b45b18bd19a9",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "bf1662b111e27cc3",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "7f86d855c312c78f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "aa86d0a79ae1599a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "ab8b5f62e67d5c5e",
+  "lastOpenFiles": [
+    "Images/2.jpg",
+    "Images/4.jpg",
+    "Images/5.jpg",
+    "Images/schemaRRG.jpg",
+    "Images/simulation Action de Masse RRG.png",
+    "Images/schemaProjet.jpg",
+    "Images/reseauHomoSapiens.png",
+    "Images/reseauHomoSapiensZoom.png",
+    "modèles d'ODE.md",
+    "Images/Figure_1.png",
+    "Images/reseauGeneAleatoire.png",
+    "Hills.md",
+    "Loi d'Action de Masse directe.md",
+    "Loi d'Action de Masse indirecte.md",
+    "Images/1.jpg",
+    "Réseau de Régulation de Gènes.md",
+    "Stage simulation dynamique de RRG.md",
+    "Images",
+    "réseaux d'interaction de gènes.md",
+    "2 - Copie.jpg.~tmp",
+    "Welcome.md",
+    "Untitled.canvas",
+    "Test link.md",
+    "9.md"
+  ]
+}
