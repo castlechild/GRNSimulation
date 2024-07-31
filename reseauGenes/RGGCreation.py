@@ -35,7 +35,7 @@ def BarabasiAlbertAlgorithm(n, an):
 
 def meanClustering(G):
     L=list(nx.clustering(G).items())
-    print("moyenne coefficient de clustering", np.mean( [L[i][1] for i in range(G.number_of_nodes())]))
+    return np.mean( [L[i][1] for i in range(G.number_of_nodes())])
 
 def createLogVerificationScaleFree(G):
     res = ([],[])
@@ -100,10 +100,13 @@ def main():
             meanClustering(G)
             print()
             coord = createLogVerificationScaleFree(G)
-            plt.scatter(coord[0],coord[1])
-            #plt.show()
-    plt.show()
-    G = BarabasiAlbertAlgorithm(nBGenes,2)
+            plt.scatter(coord[0],coord[1],label=f"am = {j}")
+            plt.xlabel("log d")
+            plt.ylabel("log(P(d)/N)")
+            plt.legend()
+            plt.title("Scale-free verification")
+    plt.savefig("Melvin/Images/scaleFreeProof.png")
+    G = BarabasiAlbertAlgorithm(20,2)
     meanClustering(G)
 
     #G = nx.DiGraph()
@@ -118,12 +121,12 @@ def main():
     #print(list(G.edges()))
     
     subax1 = plt.subplot(121)
-    nx.draw_circular(G, with_labels=True, font_weight='bold')
+    nx.draw(G, with_labels=True, font_weight='bold')
     subax1 = plt.subplot(122)
     DiG = adjacenteDiMatriceFromGraph(G,autoRG,duoRG)[0]
     edges = DiG.edges()
     colors = [DiG[u][v]['color'] for u,v in edges]
-    nx.draw_circular(DiG, with_labels=True, font_weight='bold',edge_color=colors)
+    nx.draw_kamada_kawai(DiG, with_labels=True, font_weight='bold',edge_color=colors)
     plt.show()
 
 

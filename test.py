@@ -51,16 +51,36 @@ G.number_of_nodes()
 #if a is not None:
 #    print("hello")
 #main()
-NB_GENES = 7
-AUTO_RG = 0.1
-DUO_RG = 0.2
-test = simulation(["massAction","Hills"], (0,0.20), 7, 0.1, 0.2)
-G = test["Graph"]
-Coeff = test["Coefficients"]
-print(test)
-simulation(["massAction","Hills"],(0,0.20),Graph=G,plot=True,saveName="1.png",Coeff=Coeff)
-simulation(["massAction","Hills"],(0,0.20),Graph=G,plot=True,saveName="1bis.png",Coeff=Coeff)
-simulation(["massAction","Hills"],(0,0.20),Graph=G,plot=True,saveName="2.png")
-simulation(["massAction"],(0,0.20),5,AUTO_RG,DUO_RG,plot=True,saveName="3.png")
-simulation(["Hills"],(0,0.20),5,AUTO_RG,DUO_RG,plot=True,saveName="4.png")
+def betterPrint(D:dict):
+    for obj in D:
+        print(obj,":")
+        if type(D[obj]) == dict:
+            for obj2 in D[obj]:
+                print("     ",obj2,":",D[obj][obj2])
+            print("")
+        else :
+            print(D[obj],"\n")
+
+def sim():
+    NB_GENES = 7
+    AUTO_RG = 0.1
+    DUO_RG = 0.2
+    test = simulation(["massAction","Hills"], (0,0.50), 7, 0.1, 0.2)
+    G = test["Graph"]
+    Coeff = test["Coefficients"]
+    betterPrint(test)
+    simulation(["massAction","Hills"],(0,0.50),Graph=G,plot=True,saveName="1.png",Coeff=Coeff)
+    simulation(["massAction","Hills"],(0,50),Graph=G,plot=True,saveName="1bis.png",Coeff=Coeff)
+    simulation(["massAction","Hills"],(0,0.50),Graph=G,plot=True,saveName="2.png")
+    simulation(["massAction"],(0,0.50),5,AUTO_RG,DUO_RG,plot=True,saveName="3.png")
+    simulation(["Hills"],[0,50],5,AUTO_RG,DUO_RG,plot=True,saveName="4.png")
+
+
+
+def main():
+    sim()
+
+if __name__ == "__main__":
+    main()
+        
 
