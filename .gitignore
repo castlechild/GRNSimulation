@@ -1,5 +1,5 @@
 .vscode
 .env
 *.png
-*.jpg
+/Melvin/** 
 **/__pycache__

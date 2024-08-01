@@ -5,7 +5,7 @@ import random as rd
 import numpy as np
 import pandas as pd
 
-document = pd.read_excel("reseauGenes/41586_2011_BFnature10098_MOESM304_ESM.xls")
+document = pd.read_excel("ODESystems/41586_2011_BFnature10098_MOESM304_ESM.xls")
 Attribut = document.columns.tolist()
 document = document.T
 

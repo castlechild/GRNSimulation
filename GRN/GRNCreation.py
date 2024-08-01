@@ -5,29 +5,29 @@ import random as rd
 import matplotlib.pyplot as plt
 import numpy as np
 
-#Algorithme de Barabasi-Albert
-#Ma = np.zeros((nBGenes,nBGenes))
+#Barabasi-Albert algorithm
+#Ma = np.zeros((genesNb,genesNb))
 
 def BarabasiAlbertAlgorithm(n, an):
     G = nx.Graph()
     G.add_nodes_from(range(an))
     for new_node in range(an, n):  
         sum_denominator = 2 * G.number_of_edges() + G.number_of_nodes()
-        #Création de la liste probabilistique
+        #probabilistic list creation
         s=0
         Lprob=[]
         for node in G:
             s+= (G.degree[node]+1) / sum_denominator
             Lprob.append( s )
         G.add_node(new_node)
-        #détermination des nouvelles arrêtes    
+        #new edges determination    
         for a in range(an):
             random = rd.random()
             final_node = 0
             while random > Lprob[final_node]:
                 final_node+=1
             G.add_edge(new_node,final_node)
-    #condition de connectivité
+    #connectivity condition
     if nx.is_connected(G):
         return G
     else :
@@ -48,7 +48,6 @@ def createLogVerificationScaleFree(G):
         else :
             dicD[d]+=1
     for d in dicD : 
-
         res[0].append(np.log(d))
         res[1].append(np.log( dicD[d]/N ))
     return res
@@ -86,10 +85,10 @@ def addActivationInhibition(G,M):
 
 #####################################################################################
 def main():
-    nBGenes = 5
+    genesNb = 5
     autoRG = 0.05
     duoRG = 0.1
-    Ma = np.random.randint(2,size=(nBGenes,nBGenes))
+    Ma = np.random.randint(2,size=(genesNb,genesNb))
     for i in [1000]:
         for j in [1,2,3]:
             G = BarabasiAlbertAlgorithm(i,j)
@@ -110,10 +109,10 @@ def main():
     meanClustering(G)
 
     #G = nx.DiGraph()
-    #G.add_nodes_from(range(nBGenes))
+    #G.add_nodes_from(range(genesNb))
     #
-    #for i in range(nBGenes):
-    #    for j in range(nBGenes):
+    #for i in range(genesNb):
+    #    for j in range(genesNb):
     #        if Ma[i,j] :
     #            G.add_edge(i,j)
     #
@@ -132,8 +131,8 @@ def main():
 
 
     K = []
-    for i in range(nBGenes):
-        for j in range(nBGenes):
+    for i in range(genesNb):
+        for j in range(genesNb):
             if Ma[i,j] :
                 k = rd.random()
                 K.append(k)

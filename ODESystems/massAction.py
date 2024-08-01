@@ -10,7 +10,7 @@ def MaMatrice(M, K):
     #print("plus:",MaPlus)
     return MaPlus + MaMinus
 
-def masseAction(t, G, A):
+def massAction(t, G, A):
     return np.dot(A,G)
 
 #####################################################################

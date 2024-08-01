@@ -65,20 +65,29 @@ def sim():
     NB_GENES = 7
     AUTO_RG = 0.1
     DUO_RG = 0.2
-    test = simulation(["massAction","Hills"], (0,0.50), 7, 0.1, 0.2)
+    test = simulation(["massAction","Hill"], (0,0.50), 7, 0.1, 0.2)
     G = test["Graph"]
     Coeff = test["Coefficients"]
     betterPrint(test)
-    simulation(["massAction","Hills"],(0,0.50),Graph=G,plot=True,saveName="1.png",Coeff=Coeff)
-    simulation(["massAction","Hills"],(0,50),Graph=G,plot=True,saveName="1bis.png",Coeff=Coeff)
-    simulation(["massAction","Hills"],(0,0.50),Graph=G,plot=True,saveName="2.png")
+    simulation(["massAction","Hill"],(0,0.50),Graph=G,plot=True,saveName="1.png",Coeff=Coeff)
+    simulation(["massAction","Hill"],(0,50),Graph=G,plot=True,saveName="1bis.png",Coeff=Coeff)
+    simulation(["massAction","Hill"],(0,0.50),Graph=G,plot=True,saveName="2.png")
     simulation(["massAction"],(0,0.50),5,AUTO_RG,DUO_RG,plot=True,saveName="3.png")
-    simulation(["Hills"],[0,50],5,AUTO_RG,DUO_RG,plot=True,saveName="4.png")
+    simulation(["Hill"],[0,50],5,AUTO_RG,DUO_RG,plot=True,saveName="4.png")
 
+def powerPointImage():
+    nbrCourbe = 100
+    simPP = simulation(["massAction"],(0,0.50),nbrCourbe,.1,.2)
+    for solGenes in range(nbrCourbe):
+        plt.plot(simPP["massActionX"], simPP["massActionY"][solGenes], color='k', linewidth=0.5)
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
+    plt.savefig("graphiquePowerPoint.png")
 
 
 def main():
-    sim()
+    powerPointImage()
+    pass
 
 if __name__ == "__main__":
     main()
