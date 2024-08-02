@@ -11,6 +11,7 @@ def MaMatrice(M, K):
     return MaPlus + MaMinus
 
 def massAction(t, G, A):
+    del t
     return np.dot(A,G)
 
 #####################################################################

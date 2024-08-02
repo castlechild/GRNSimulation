@@ -6,6 +6,7 @@ import numpy as np
 # Hill_inhibition(G) = k . K^n / (K^n + G^n)
 
 def HillEquation(t, G, Adj, K, Ka, K_synt, K_deg, n):
+    del t
     dG = np.zeros(len(G))
     for i in range(len(dG)):
         dG[i]=K[i]

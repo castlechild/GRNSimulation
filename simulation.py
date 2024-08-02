@@ -1,13 +1,34 @@
 #!/usr/bin/env python3
 from scipy.integrate import solve_ivp
-from GRN.GRNCreation import *
-from ODESystems.coefficientFinder import *
-from GRN.genesGroupe import *
-from ODESystems.massAction import *
-from ODESystems.Hill import *
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+
+from GRN.GRNCreation import meanClustering, BarabasiAlbertAlgorithm, adjacenteDiMatriceFromGraph
+from ODESystems.coefficientFinder import getCoefficient
+from GRN.genesGroupe import subgraph3N
+from ODESystems.massAction import MaMatrice, massAction
+from ODESystems.Hill import HillEquation
 
 
 def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:float=None, Graph=None, Coeff:dict=None, plot:bool=False, saveName:str=None) -> dict :
+    """
+    Simulates the given ODE systems over the specified time interval.
+    
+    Parameters:
+    - odes: list of ODE systems to simulate.
+    - T: tuple representing the time interval.
+    - genes_nb: number of genes.
+    - auto_rg: auto-regulation parameter.
+    - duo_rg: dual regulation parameter.
+    - graph: graph structure.
+    - coeff: coefficients dictionary.
+    - plot: boolean indicating whether to plot the results.
+    - save_name: filename to save the plot.
+    
+    Returns:
+    - res_dict: dictionary containing the simulation results.
+    """
 
     def otherODE(L):
         for ode in L:
