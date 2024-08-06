@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='projet',
+    name='ochunGRN',
     version='0.1.0',
     packages=find_packages(),
     install_requires=[
@@ -12,11 +12,6 @@ setup(
     ],
     extras_require={
         'dev': ['pytest'],
-    },
-    entry_points={
-        'console_scripts': [
-            'simulation=projet.simulation:main',
-        ],
     },
     author='Melvin Bonamour',
     author_email='melaug91@hotmail.fr',

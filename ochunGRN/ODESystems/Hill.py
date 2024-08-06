@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import numpy as np
 
-# dG/dt = k * \prod( Hill_inhibition(G_i) * Hill_activation(G_a) ) + k_synthesis - k_degratation . G
-# Hill_activation(G) = k . G^n / (K^n + G^n)
-# Hill_inhibition(G) = k . K^n / (K^n + G^n)
+# dG/dt = k * \prod( Hill_inhibition(G_i) * Hill_activation(G_a) )  - k_degratation . G
+# Hill_activation(G) = 1 + G^n / (K^n + G^n)
+# Hill_inhibition(G) =  K^n / (K^n + G^n)
 
 def HillEquation(t, G, Adj, K, Ka, K_synt, K_deg, n):
     del t
@@ -24,7 +24,7 @@ def Hill_inhibition(G_i, ka, n):
     return ka**n / (ka**n + G_i**n)
 
 def Hill_activation(G_a, ka, n):
-    return 1 + G_a**n / (ka**n + G_a**n)
+    return  G_a**n / (ka**n + G_a**n)
 
 
 def main():

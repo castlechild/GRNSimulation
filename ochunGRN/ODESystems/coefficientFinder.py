@@ -5,28 +5,30 @@ import random as rd
 import numpy as np
 import pandas as pd
 
-document = pd.read_excel("ODESystems/41586_2011_BFnature10098_MOESM304_ESM.xls")
+document = pd.read_excel("ochunGRN/ODESystems/41586_2011_BFnature10098_MOESM304_ESM.xls")
 Attribut = document.columns.tolist()
 document = document.T
 
 def getCoefficient(GenesNb):
     resDict = {}
-    resDict["ProtsHalfTime"] = []
-    resDict["mRNAsHalfTime"] = []
+    resDict["ProtsDeg"] = []
+    resDict["mRNAsDeg"] = []
     resDict["TranscriptionsRate"] = []
     resDict["TranslationsRate"] = []
     resDict["mRNAAvg"] = []
+    resDict["ProtAvg"] = []
     for i in range(GenesNb):
         randomNb = rd.randint(0,5027)
         L=document[randomNb].tolist()
-        while True in pd.isna([L[i] for i in [16,19,22,25,28]]):
+        while True in pd.isna([L[i] for i in [13,16,19,22,25,28]]):
             randomNb = rd.randint(0,5027)
             L=document[randomNb].tolist()
-        resDict["ProtsHalfTime"].append(L[19])
-        resDict["mRNAsHalfTime"].append(L[22])
+        resDict["ProtsDeg"].append(np.sqrt(2)/L[19])
+        resDict["mRNAsDeg"].append(np.sqrt(2)/L[22])
         resDict["TranscriptionsRate"].append(L[25])
         resDict["TranslationsRate"].append(L[28])
         resDict["mRNAAvg"].append(L[16])
+        resDict["ProtAvg"].append(L[13])
     return resDict
 
 def main():

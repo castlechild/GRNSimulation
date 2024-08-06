@@ -4,18 +4,19 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from GRN.GRNCreation import meanClustering, BarabasiAlbertAlgorithm, adjacenteDiMatriceFromGraph
-from ODESystems.coefficientFinder import getCoefficient
+from GRN.GRNCreationUtils import meanClustering, BarabasiAlbertAlgorithm, adjacenteDiMatriceFromGraph
 from GRN.genesGroupe import subgraph3N
+from ODESystems.coefficientFinder import getCoefficient
 from ODESystems.massAction import MaMatrice, massAction
 from ODESystems.Hill import HillEquation
+from ODESystems.indirect import indirect
 
 
-def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:float=None, Graph=None, Coeff:dict=None, plot:bool=False, saveName:str=None) -> dict :
+def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:float=None, nHill=1, Graph=None, M=None, Coeff:dict=None, plot:bool=False, saveName:str=None) -> dict :
     """
     Simulates the given ODE systems over the specified time interval.
     
-    Parameters:
+    Args:
     - odes: list of ODE systems to simulate.
     - T: tuple representing the time interval.
     - genes_nb: number of genes.
@@ -27,25 +28,33 @@ def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:fl
     - save_name: filename to save the plot.
     
     Returns:
-    - res_dict: dictionary containing the simulation results.
+    - dictionary containing the simulation results.
     """
 
     def otherODE(L):
         for ode in L:
-            if ode not in ["massAction", "Hill"]:
+            if ode not in ["massAction", "Hill","indirect"]:
                 return True
         return False 
     
     if len(ODEs) == 0 and otherODE(ODEs): 
         raise ValueError("ODEs not valid")
-    if Graph is None and ((genesNb is None) or (autoRG is None) or (duoRG is None)):
+    if (Graph is None and M is None) and ((genesNb is None) or (autoRG is None) or (duoRG is None)):
         raise ValueError("the generation did not have a graph entry or parameter to create one")
     if len(T) != 2 and T[0] >= T[1]:
         raise ValueError("the temporal pair is invalid")
     
     if Graph is None:
-        Graph = BarabasiAlbertAlgorithm(genesNb, 2)
-        Graph,M = adjacenteDiMatriceFromGraph(Graph, autoRG, duoRG)
+        if M is None:    
+            Graph = BarabasiAlbertAlgorithm(genesNb, 2)
+            Graph,M = adjacenteDiMatriceFromGraph(Graph, autoRG, duoRG)
+        else :
+            genesNb = len(M)
+            Graph = nx.DiGraph()
+            for i in range(genesNb):
+                for j in range(genesNb):
+                    if M[i][j] != 0:
+                        Graph.add_edge(i, j)
     else:
         M = np.transpose(nx.to_numpy_array(Graph))
         genesNb = Graph.number_of_nodes()
@@ -66,7 +75,8 @@ def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:fl
     resDict["subGraph"] = subgraph3N(Graph)
 
     if "massAction" in ODEs:
-        K = np.resize(Coeff["TranslationsRate"],(genesNb,genesNb))
+        Prout = [Coeff["TranslationsRate"][i]/Coeff["mRNAAvg"][i] for i in range(genesNb)]
+        K = np.resize(Prout,(genesNb,genesNb))
         Ma = MaMatrice(M, K)
         
         equation = lambda t,G: massAction(t, G, Ma)     
@@ -75,23 +85,38 @@ def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:fl
         resDict["massActionX"] = solution.t
     
     if "Hill" in ODEs:
-        K = Coeff["TranslationsRate"]
-        Kdeg = np.sqrt(2)/Coeff["ProtsHalfTime"]
-        equation = lambda t,G: HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 1)
+        K = Coeff["TranscriptionsRate"]
+        Kdeg = Coeff["mRNAsDeg"]
+        equation = lambda t,G: HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 5)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
         resDict["HillsY"] = solution.y
         resDict["HillsX"] = solution.t
+
+    if "indirect" in ODEs:
+        k_P = Coeff["TranslationsRate"]
+        Ka_P = G0
+        k_mRNA = Coeff["TranscriptionsRate"]
+        K_degP = Coeff["ProtsDeg"]
+        K_degMRNA = Coeff["mRNAsDeg"]
+        def equation(t, G):
+            mRNA = G[:genesNb]
+            P = G[genesNb:]
+            return indirect(t, mRNA, P, M, k_mRNA, k_P, Ka_P, K_degP, K_degMRNA, 5)
+        G0_indirect = np.concatenate((G0, Coeff["ProtAvg"]))
+        solution = solve_ivp(equation, [t0, tf], G0_indirect, max_step= 0.5)
+        resDict["indirectY"] = solution.y[:genesNb]
+        resDict["indirectX"] = solution.t
 
     if plot:
         plt.figure()
         edges = Graph.edges()
         colors = [Graph[u][v]['color'] for u,v in edges]
-        font = {'family':'serif','color':'darkred','size':10}
-        plt.subplot(1 + int("Hill" in ODEs), 2, 1)
+        font = {'family':'serif','color':'darkred','size':8}
+        plt.subplot(2, 2, 1)
         nx.draw_circular(Graph, with_labels=True, font_weight='bold',edge_color=colors)
         plt.title("Graph RGG")
         
-        if "Hill" in ODEs :
+        if "Hill" or "indirect" in ODEs :
             acInColors = [Graph[u][v]['acInColor'] for u,v in edges]
             plt.subplot(2,2,3)
             nx.draw_circular(Graph, with_labels=True, font_weight='bold',edge_color=acInColors, connectionstyle="arc3,rad=0.05" )
@@ -111,13 +136,23 @@ def simulation(ODEs:list, T:tuple, genesNb:int=None, autoRG:float=None, duoRG:fl
             plt.legend()
 
         if "Hill" in ODEs:
-            plt.subplot(len(ODEs),2,2*len(ODEs))
+            plt.subplot(len(ODEs),2,min(2*len(ODEs),4))
             for solGenes in range(genesNb):
                 plt.plot(resDict["HillsX"], resDict["HillsY"][solGenes], label=solGenes)
             plt.xlabel("time (h)", fontdict=font)
             plt.ylabel("Genes concentrations", fontdict=font)
             plt.title("Hill law Simulation")
             plt.legend()
+
+        if "indirect" in ODEs:
+            plt.subplot(len(ODEs), 2, len(ODEs)*2)
+            for solGenes in range(genesNb):
+                plt.plot(resDict["indirectX"], resDict["indirectY"][solGenes], label=solGenes)
+            plt.xlabel("time (h)", fontdict=font)
+            plt.ylabel("mRNA concentrations", fontdict=font)
+            plt.title("indirect (massAction & Hill laws) Simulation")
+            plt.legend()
+
         manager = plt.get_current_fig_manager()
         manager.full_screen_toggle()
         if saveName is None:     
@@ -132,7 +167,7 @@ def main():
     NB_GENES = 7
     AUTO_RG = 0.1
     DUO_RG = 0.2
-    simulation(["massAction","Hill"],(0,0.2),NB_GENES,AUTO_RG,DUO_RG,plot=True)
+    simulation(["massAction","Hill","indirect"],(0,100),NB_GENES,AUTO_RG,DUO_RG,plot=True)
 
 
 if __name__ == "__main__":
