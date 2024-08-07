@@ -1,0 +1,69 @@
+Metadata-Version: 2.1
+Name: ochunGRN
+Version: 0.1.0
+Summary: Simulation dynamique de Benchmark de Reseau de Regulation Genique pour l'inférence
+Home-page: https://github.com/castlechild/GRNSimulation
+Author: Melvin Bonamour
+Author-email: melaug91@hotmail.fr
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: networkx
+Requires-Dist: matplotlib
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+
+# GRN synthetic data simulation
+
+Simulation dynamique de benchmarks de rÃ©seaux de rÃ©gulation gÃ©niques pour l'entraÃ®nement d'algorithmes d'infÃ©rence.
+
+## Table des MatiÃ¨res
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [Tests](#tests)
+
+## Introduction
+
+Ce projet permet de simuler dynamiquement des rÃ©seaux de rÃ©gulation gÃ©niques (GRN) en utilisant des Ã©quations diffÃ©rentielles ordinaires (ODEs) et de gÃ©nÃ©rer des benchmarks pour l'entraÃ®nement et l'Ã©valuation d'algorithmes d'infÃ©rence. Le projet supporte trois types d'ODEs : loi Action de Masse et loi de Hill.
+
+
+## Installation
+
+### PrÃ©requis
+
+- Python 3.6+
+- `pip`
+
+### Ã‰tapes d'installation
+
+1. Clonez le dÃ©pÃ´t :
+    ```sh
+    git clone https://github.com/castlechild/GRNSimulation
+    cd projet
+    ```
+
+2. Installez les dÃ©pendances :
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+3. Installez le package :
+    ```sh
+    pip install .
+    ```
+
+## Utilisation
+
+### ExÃ©cution de la simulation
+
+Vous pouvez exÃ©cuter une simulation en utilisant le script principal `main.py` :
+
+```sh
+python main.py
+```
