@@ -4,4 +4,4 @@ networkx
 matplotlib
 pytest
 pandas
-pkg_ressources
+pkg_resources
