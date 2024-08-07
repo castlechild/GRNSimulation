@@ -4,8 +4,10 @@ import networkx as nx
 import random as rd
 import numpy as np
 import pandas as pd
+import pkg_resources
 
-document = pd.read_excel("GRN/41598_2021_3625_MOESM5_ESM.xlsx")
+excel_path = pkg_resources.resource_filename("ochunGRN", "GRN/41598_2021_3625_MOESM5_ESM.xlsx") 
+document = pd.read_excel(excel_path)
 
 arabidopsisThaliana=(document["Supplementary Table S1: Networks. A spreadsheet file with filtered networks"].tolist()[2:],document["Unnamed: 1"].tolist()[2:], "Arabidopsis thaliana" )
 drosophilaMelanogaster=(document["Unnamed: 2"].tolist()[2:],document["Unnamed: 3"].tolist()[2:],"Drosophila Melanogaster")

@@ -4,8 +4,10 @@ import networkx as nx
 import random as rd
 import numpy as np
 import pandas as pd
+import pkg_resources
 
-document = pd.read_excel("ochunGRN/ODESystems/41586_2011_BFnature10098_MOESM304_ESM.xls")
+excel_path = pkg_resources.resource_filename("ochunGRN", "ODESystems/41586_2011_BFnature10098_MOESM304_ESM.xls")
+document = pd.read_excel(excel_path)
 Attribut = document.columns.tolist()
 document = document.T
 

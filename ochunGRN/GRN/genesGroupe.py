@@ -13,10 +13,10 @@ def findGroupGraph(threeNGraph):
     if nEdges == 2:
         for u in threeNGraphWAuto:
             if threeNGraphWAuto.in_degree[u] == 2:
-                return "E"
+                return "Fan-In"
             elif threeNGraphWAuto.out_degree[u] == 2:
-                return "D"
-        return "C"
+                return "Fan-Out"
+        return "Cascade"
     
     elif nEdges == 3:
         for u in threeNGraphWAuto:
@@ -28,14 +28,14 @@ def findGroupGraph(threeNGraph):
                         return "C-E"
         for u in threeNGraphWAuto:
             if threeNGraphWAuto.in_degree[u] == 2:
-                return "B"
-        return "A"
+                return "FFL"
+        return "Triangular"
     
     elif nEdges == 4:
         for u in threeNGraphWAuto:
             for v in threeNGraphWAuto:
                 if u!=v and (u,v) not in edges and (v,u) not in edges:
-                    return "SC"
+                    return "SCascade"
         for u in threeNGraphWAuto:
             if threeNGraphWAuto.degree[u] == 2:
                 if threeNGraphWAuto.in_degree[u] == 2:
@@ -46,10 +46,10 @@ def findGroupGraph(threeNGraph):
         raise 
 
     elif nEdges == 5:
-        return "5one"
+        return "5edges"
     
     elif nEdges == 6:
-        return "SA"
+        return "6edges"
     
     raise
 

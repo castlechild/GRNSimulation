@@ -2,7 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 #from simulation import *
-import Simulation.simulation as Melvin
+import ochunGRN as oGRN
 
 G = nx.DiGraph()
 G.number_of_nodes()

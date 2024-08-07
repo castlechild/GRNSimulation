@@ -3,3 +3,5 @@ numpy
 networkx
 matplotlib
 pytest
+pandas
+pkg_ressources

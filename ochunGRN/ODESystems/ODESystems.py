@@ -29,8 +29,8 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
     GenesDict["Coefficients"] = Coeff
     GenesDict["ODEs"] = ODEs
     if "massAction" in ODEs:
-        Prout = [Coeff["TranslationsRate"][i]/Coeff["mRNAAvg"][i] for i in range(genesNb)]
-        K = np.resize(Prout,(genesNb,genesNb))
+        RatioCoeff = [Coeff["TranscriptionsRate"][i]/Coeff["mRNAAvg"][i] for i in range(genesNb)]
+        K = np.resize(RatioCoeff,(genesNb,genesNb))
         Ma = MaMatrice(M, K)
         
         equation = lambda t,G: massAction(t, G, Ma)     
@@ -43,8 +43,8 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
         Kdeg = Coeff["mRNAsDeg"]
         equation = lambda t,G: HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 5)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        GenesDict["HillsY"] = solution.y
-        GenesDict["HillsX"] = solution.t
+        GenesDict["HillY"] = solution.y
+        GenesDict["HillX"] = solution.t
 
     if "indirect" in ODEs:
         k_P = Coeff["TranslationsRate"]

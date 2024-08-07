@@ -24,7 +24,7 @@ def Hill_inhibition(G_i, ka, n):
     return ka**n / (ka**n + G_i**n)
 
 def Hill_activation(G_a, ka, n):
-    return  G_a**n / (ka**n + G_a**n)
+    return  1 + (G_a**n / (ka**n + G_a**n))
 
 
 def main():

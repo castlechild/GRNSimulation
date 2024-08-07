@@ -13,6 +13,10 @@ setup(
     extras_require={
         'dev': ['pytest'],
     },
+    package_data={
+        "ochunGRN": ["ODESystems/41586_2011_BFnature10098_MOESM304_ESM.xls"],
+        "ochunGRN": ["GRN/41598_2021_3625_MOESM5_ESM.xlsx"],
+    },
     author='Melvin Bonamour',
     author_email='melaug91@hotmail.fr',
     description="Simulation dynamique de Benchmark de Reseau de Regulation Genique pour l'inférence",

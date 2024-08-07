@@ -1,5 +1,5 @@
-from .GRN.GRN import *
+from .GRN.GRN import Grn
 
-from .ODESystems.ODESystems import *
+from .ODESystems.ODESystems import simulationODEs,getCoefficient
 
-from .Plot.plot import *
+from .Plot.plot import plotGraph,plotSim
