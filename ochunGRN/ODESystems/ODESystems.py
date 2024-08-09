@@ -7,7 +7,7 @@ from Hill import HillEquation
 from indirect import indirect
 
 def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
-    def otherODE(L):
+    def otherODE(L:list):
         for ode in L:
             if ode not in ["massAction", "Hill","indirect"]:
                 return True
@@ -31,18 +31,20 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
     if "massAction" in ODEs:
         RatioCoeff = [Coeff["TranscriptionsRate"][i]/Coeff["mRNAAvg"][i] for i in range(genesNb)]
         K = np.resize(RatioCoeff,(genesNb,genesNb))
-        Ma = MaMatrice(M, K)
+        Ma = MaMatrice(np.transpose(M), K)
         
         equation = lambda t,G: massAction(t, G, Ma)     
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
+        normalisation(solution.y)
         GenesDict["massActionY"] = solution.y
         GenesDict["massActionX"] = solution.t
     
     if "Hill" in ODEs:
         K = Coeff["TranscriptionsRate"]
         Kdeg = Coeff["mRNAsDeg"]
-        equation = lambda t,G: HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 5)
+        equation = lambda t,G: HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 2)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
+        normalisation(solution.y)
         GenesDict["HillY"] = solution.y
         GenesDict["HillX"] = solution.t
 
@@ -55,8 +57,17 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
         def equation(t, G):
             mRNA = G[:genesNb]
             P = G[genesNb:]
-            return indirect(t, mRNA, P, M, k_mRNA, k_P, Ka_P, K_degP, K_degMRNA, 5)
+            return indirect(t, mRNA, P, M, k_mRNA, k_P, Ka_P, K_degP, K_degMRNA, 2)
         G0_indirect = np.concatenate((G0, Coeff["ProtAvg"]))
         solution = solve_ivp(equation, [t0, tf], G0_indirect, max_step= 0.5)
+        normalisation(solution.y)
         GenesDict["indirectY"] = solution.y[:genesNb]
         GenesDict["indirectX"] = solution.t
+
+def normalisation(YLists):
+    listNb = len(YLists)
+    listSize = len(YLists[0])
+    for i in range(listNb):
+        ratio = max(YLists[i])
+        for j in range(listSize):
+            YLists[i][j]/=ratio

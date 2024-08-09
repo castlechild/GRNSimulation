@@ -11,7 +11,7 @@ def HillEquation(t, G, Adj, K, Ka, K_synt, K_deg, n):
     for i in range(len(dG)):
         dG[i]=K[i]
         for j in range(len(dG)):
-            stateEdge = Adj[i][j]
+            stateEdge = Adj[j][i]
             if stateEdge == 1:
                 dG[i]*= Hill_activation(G[j],Ka[j],n)
             elif stateEdge == -1:

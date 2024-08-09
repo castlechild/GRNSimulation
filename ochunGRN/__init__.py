@@ -1,4 +1,4 @@
-from .GRN.GRN import Grn
+from .GRN.GRN import randomGrn, GrnFromAdj
 
 from .ODESystems.ODESystems import simulationODEs,getCoefficient
 

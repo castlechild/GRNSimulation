@@ -26,7 +26,7 @@ Ce projet permet de simuler dynamiquement des réseaux de régulation géniques 
 1. Clonez le dépôt :
     ```sh
     git clone https://github.com/castlechild/GRNSimulation
-    cd projet
+    cd GRNSimulation
     ```
 
 2. Installez les dépendances :

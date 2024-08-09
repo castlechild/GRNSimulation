@@ -12,7 +12,7 @@ def indirect(t, mRNA, P, Adj, k_mRNA, k_P, Ka_P, K_degP, K_degMRNA, n):
         dP[i] = k_mRNA[i]*mRNA[i] - K_degP[i]*P[i]
         dmNRA[i]= k_P[i]
         for j in range(genesNb):
-            stateEdge = Adj[i][j]
+            stateEdge = Adj[j][i]
             if stateEdge == 1:
                 dP[i] -= k_mRNA[j]*P[i]
                 dmNRA[i]*= Hill_activation(P[j],Ka_P[j],n)

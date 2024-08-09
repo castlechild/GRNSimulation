@@ -70,7 +70,7 @@ def adjacenteDiMatriceFromGraph(G, autoRG, duoRG):
         rdNumber = rd.random()
         if rdNumber < autoRG :
             DiG.add_edge(node,node,color='gray')
-    M = np.transpose(nx.to_numpy_array(DiG))
+    M = nx.to_numpy_array(DiG)
     addActivationInhibition(DiG,M)
     return (DiG, M)
 
@@ -78,10 +78,24 @@ def addActivationInhibition(G,M):
     for u,v in G.edges():
         inhibitionBool = rd.random() < 0.5
         if inhibitionBool:
-            M[v][u] *= -1
+            M[u][v] *= -1
             G[u][v]['acInColor'] = 'r'
         else :
             G[u][v]['acInColor'] = 'g'
+
+def addColors(G,M):
+    for u,v in G.edges():
+        if v == u :
+            G[u][v]['color'] = "gray"
+        elif (v,u) in G.edges():
+            G[u][v]['color'] = "black"
+        else : 
+            G[u][v]['color'] = "blue"
+        
+        if M[u][v]==1:
+            G[u][v]["acInColor"] = 'g'
+        else :
+            G[u][v]["acInColor"] = 'r'
 
 #####################################################################################
 def main():

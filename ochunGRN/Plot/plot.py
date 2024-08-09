@@ -9,13 +9,13 @@ def plotGraph(GenesDict, actInhPlotBool=False, saveName=None):
     
     plt.subplot(1+ actInhPlotBool, 1, 1)
     nx.draw_circular(Graph, with_labels=True, font_weight='bold',edge_color=colors)
-    plt.title("Graph RGG")
+    plt.title("GRN Graph")
     
     if actInhPlotBool:
         acInColors = [Graph[u][v]['acInColor'] for u,v in edges]
         plt.subplot(2,1,2)
         nx.draw_circular(Graph, with_labels=True, font_weight='bold',edge_color=acInColors, connectionstyle="arc3,rad=0.05" )
-        plt.title("Graph RGG Activator/Inhibitor")
+        plt.title("GRN Graph Activator/Inhibitor")
     if saveName is not None:     
         plt.savefig(saveName)
 
