@@ -43,8 +43,8 @@ Ce projet permet de simuler dynamiquement des réseaux de régulation géniques 
 
 ### Exécution de la simulation
 
-Vous pouvez exécuter une simulation en utilisant le script principal `main.py` :
+Vous pouvez exécuter une simulation en utilisant le notebook d'exemple `exemple.ipynb` :
 
 ```sh
-python main.py
+code exemple.ipynb
 ```

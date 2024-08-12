@@ -2,6 +2,17 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 def findGroupGraph(threeNGraph):
+    """
+    Identify the type of three-node subgraph (pattern) in a directed graph.
+
+    This function takes a three-node subgraph and classifies it based on its structural patterns into one of the following types: "Fan-In", "Fan-Out", "Cascade", "FFL", "Triangular", "C-D", "C-E", "SCascade", "dC", "dD", "dE", "5edges", and "6edges".
+
+    Parameters:
+    - threeNGraph (networkx.DiGraph): The three-node subgraph to analyze.
+
+    Returns:
+    - str: The detected pattern type among the available options.
+    """
     threeNGraphWAuto = nx.DiGraph()
     edges = threeNGraph.edges()
     for u,v in edges:
@@ -54,6 +65,17 @@ def findGroupGraph(threeNGraph):
     raise
 
 def subgraph3N(Graph):
+    """
+    Extract and analyze all three-node subgraphs from a given graph.
+
+    This function traverses a given graph, extracts all subgraphs containing exactly three nodes, and uses the `findGroupGraph` function to classify each one.
+
+    Parameters:
+    - Graph (networkx.Graph): The graph to analyze.
+
+    Returns:
+    - dict: A dictionary where the keys are the types of patterns found and the values are the counts of each type.
+    """
     resDic = {}
     nbNodes = Graph.number_of_nodes()
     for u in range(nbNodes-2):

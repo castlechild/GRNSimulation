@@ -2,6 +2,19 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 def plotGraph(GenesDict, actInhPlotBool=False, saveName=None):
+    """
+    Plot the Gene Regulatory Network (GRN) graph from the provided gene dictionary.
+
+    This function plots a graph using a circular layout. If the actInhPlotBool option is enabled, it also creates a separate plot to represent the activators and inhibitors in the network.
+
+    Parameters:
+    - GenesDict (dict): A dictionary containing information about the graph, under the key "Graph."
+    - actInhPlotBool (bool, optional): If True, an additional graph showing activators and inhibitors is plotted.
+    - saveName (str, optional): If provided, the graph will be saved with this file name.
+
+    Returns:
+    - None: The graph is displayed or saved depending on the parameters
+    """
     Graph = GenesDict["Graph"]
     plt.figure()
     edges = Graph.edges()
@@ -20,6 +33,18 @@ def plotGraph(GenesDict, actInhPlotBool=False, saveName=None):
         plt.savefig(saveName)
 
 def plotSim(GenesDict, saveName=None):
+    """
+    Plot the simulation results of the ODEs for the gene regulatory network.
+
+    This function plots the simulated mRNA concentrations for each type of ODE specified in GenesDict. The results are displayed on separate subplots for each ODE.
+
+    Parameters:
+    - GenesDict (dict): A dictionary containing the simulation results for each type of ODE.
+    - saveName (str, optional): If provided, the graph will be saved with this file name.
+    
+    Returns:
+    - None: The graph is displayed or saved depending on the parameters.
+    """
     font = {'family':'serif','color':'darkred','size':8}
     ODEs = GenesDict["ODEs"]
     genesNb = GenesDict["genesNb"]

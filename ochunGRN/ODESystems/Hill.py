@@ -6,6 +6,33 @@ import numpy as np
 # Hill_inhibition(G) =  K^n / (K^n + G^n)
 
 def HillEquation(t, G, Adj, K, Ka, K_synt, K_deg, n):
+    r"""
+    Computes the rate of change of gene expression levels based on Hill functions for activation and inhibition.
+
+    The function calculates the derivative of gene expression levels using a system of Hill equations.
+    This model incorporates both activation and inhibition effects based on the Hill function.
+    
+    :math:`\frac{dG_i}{dt} = k_i \prod_{j} (Hill_{activation}(G_j)^{\text{stateEdge}_{ji}} \cdot Hill_{inhibition}(G_j)^{1 - \text{stateEdge}_{ji}}) + K_{synt_i} - K_{deg_i} G_i`
+
+    Where:
+
+    - :math:`Hill_{activation}(G_a) = 1 + \frac{G_a^n}{K_a^n + G_a^n}`
+    - :math:`Hill_{inhibition}(G_i) = \frac{K_a^n}{K_a^n + G_i^n}`
+
+    Args:
+        t (float): The current time point (not used in the calculation).
+        G (numpy.ndarray): A 1D array of gene expression levels at time t.
+        Adj (numpy.ndarray): A 2D adjacency matrix representing interactions between genes.
+                             `Adj[i][j]` indicates the effect of gene j on gene i (1 for activation, -1 for inhibition).
+        K (numpy.ndarray): A 1D array of baseline rate constants for each gene.
+        Ka (numpy.ndarray): A 1D array of Hill constants (Ka) for the activation and inhibition functions.
+        K_synt (numpy.ndarray): A 1D array of synthesis rate constants for each gene.
+        K_deg (numpy.ndarray): A 1D array of degradation rate constants for each gene.
+        n (int): The Hill coefficient, which defines the steepness of the activation/inhibition response.
+
+    Returns:
+        numpy.ndarray: A 1D array where each element represents the rate of change of the corresponding gene's expression level.
+    """
     del t
     dG = np.zeros(len(G))
     for i in range(len(dG)):

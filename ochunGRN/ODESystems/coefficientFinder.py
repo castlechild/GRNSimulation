@@ -12,6 +12,15 @@ Attribut = document.columns.tolist()
 document = document.T
 
 def getCoefficient(GenesNb):
+    """
+    Extracts random coefficients for a specified number of genes.
+
+    Args:
+        genes_nb (int): The number of genes to extract coefficients for.
+
+    Returns:
+        dict: A dictionary containing the coefficients.
+    """
     resDict = {}
     resDict["ProtsDeg"] = []
     resDict["mRNAsDeg"] = []

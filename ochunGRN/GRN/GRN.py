@@ -3,6 +3,22 @@ from genesGroupe import subgraph3N
 import networkx as nx
 
 def randomGrn(genesNb:int, autoRG:float, duoRG:float, resDict:dict=None):
+    """
+    Generate a random Gene Regulatory Network (GRN).
+
+    This function generates a GRN using the Barabasi-Albert algorithm to create a graph,
+    then calculates the adjacency matrix and other graph characteristics, 
+    such as the average clustering coefficient and a 3-node subgraph.
+
+    Parameters:
+    - genesNb (int): The number of genes (nodes) in the network.
+    - autoRG (float): The rate of self-regulation in the network.
+    - duoRG (float): The regulation rate between pairs of genes.
+    - resDict (dict, optional): A dictionary to store the results. If no dictionary is provided, a new one is created.
+
+    Returns:
+    - dict: A dictionary containing the generated graph, adjacency matrix, average clustering coefficient, and a subgraph.
+    """
     if resDict is None:
         resDict = {}
     Graph = BarabasiAlbertAlgorithm(genesNb, 2)
@@ -16,6 +32,18 @@ def randomGrn(genesNb:int, autoRG:float, duoRG:float, resDict:dict=None):
     return resDict
 
 def GrnFromAdj(AdjMatrice, resDict:dict=None):
+    """
+    Create a Gene Regulatory Network (GRN) from an adjacency matrix.
+
+    This function constructs a directed graph from a given adjacency matrix, 
+    then calculates the number of self-regulations and other graph characteristics.
+
+    Parameters:
+    - AdjMatrice (numpy.ndarray): The adjacency matrix representing the GRN.
+    - resDict (dict, optional): A dictionary to store the results. If no dictionary is provided, a new one is created.
+    Returns:
+    - dict: A dictionary containing the generated graph, the number of genes, the number of self-regulations, and other characteristics.
+    """
     if resDict is None:
         resDict = {}
     genesNb = len(AdjMatrice)
