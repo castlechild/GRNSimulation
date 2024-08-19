@@ -1,7 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from itertools import combinations
-from multiprocessing import Pool, cpu_count
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 
 def findGroupGraph(threeNGraph):
     """
@@ -64,7 +65,7 @@ def findGroupGraph(threeNGraph):
     elif nEdges == 6:
         return "6edges"
     
-    raise
+    raise ValueError("Unclassified graph pattern")
 
 def subgraph3N(Graph):
     """
@@ -79,16 +80,14 @@ def subgraph3N(Graph):
     - dict: A dictionary where the keys are the types of patterns found and the values are the counts of each type.
     """
     resDic = {}
-    nbNodes = Graph.number_of_nodes()
     nodes = list(Graph.nodes)
-    for u in range(nbNodes-2):
-        if u%50==0:
-            print(u)
-        for v in range(u+1,nbNodes-1):
-            for w in range(v+1,nbNodes):
-                if issubgraphconnected(Graph, nodes[u],nodes[v],nodes[w]):
-                    Subgraph = nx.subgraph(Graph, [nodes[u],nodes[v],nodes[w]])
-                    resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
+    total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
+    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
+        if i % 1000000 == 0:
+            print(f"Queued {i}/{total_combinations} combinations ({i/total_combinations*100:.2f}%)")
+        if issubgraphconnected(Graph, u,v,w):
+            Subgraph = nx.subgraph(Graph, [u,v,w])
+            resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
     return resDic
 
 def issubgraphconnected(Graph, nodeA, nodeB, nodeC):
@@ -102,25 +101,24 @@ def issubgraphconnected(Graph, nodeA, nodeB, nodeC):
         i+=1
     return i>=2
     
-def process_subgraph(args):
-    Graph, u, v, w = args
-    if issubgraphconnected(Graph, u, v, w):
-        Subgraph = Graph.subgraph([u, v, w])
-        return f"{u}-{v}-{w}", findGroupGraph(Subgraph)
-    return None
-
-def subgraph3N_parallel(Graph, num_processes=4):
+def subgraph3N_parallel(Graph):
     resDic = {}
-    nodes = list(Graph.nodes())
-    total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
+    nodes = list(Graph.nodes)
     
-    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
-        if i % 1000000 == 0:
-            print(f"Processed {i}/{total_combinations} combinations ({i/total_combinations*100:.2f}%)")
-        
-        if issubgraphconnected(Graph, u, v, w):
-            Subgraph = Graph.subgraph([u, v, w])
-            resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
+    def process_combination(combo):
+        u, v, w = combo
+        if issubgraphconnected(Graph, nodes[u], nodes[v], nodes[w]):
+            Subgraph = nx.subgraph_view(Graph, filter_node=lambda n: n in [nodes[u], nodes[v], nodes[w]])
+            return f"{u}-{v}-{w}", findGroupGraph(Subgraph)
+        return None
+
+    with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
+        for i, result in enumerate(executor.map(process_combination, combinations(range(len(nodes)), 3))):
+            if i % 50000 == 0:
+                print(i)
+            if result:
+                key, value = result
+                resDic[key] = value
     
     return resDic
 
