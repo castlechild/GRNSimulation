@@ -1,5 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from itertools import combinations
+from multiprocessing import Pool, cpu_count
 
 def findGroupGraph(threeNGraph):
     """
@@ -78,18 +80,52 @@ def subgraph3N(Graph):
     """
     resDic = {}
     nbNodes = Graph.number_of_nodes()
+    nodes = list(Graph.nodes)
     for u in range(nbNodes-2):
+        if u%50==0:
+            print(u)
         for v in range(u+1,nbNodes-1):
             for w in range(v+1,nbNodes):
-                Subgraph = nx.subgraph(Graph, [u,v,w])
-                UndirectG = Subgraph.to_undirected()
-                if nx.is_connected(UndirectG):
+                if issubgraphconnected(Graph, nodes[u],nodes[v],nodes[w]):
+                    Subgraph = nx.subgraph(Graph, [nodes[u],nodes[v],nodes[w]])
                     resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
     return resDic
 
+def issubgraphconnected(Graph, nodeA, nodeB, nodeC):
+    neigboursC = Graph
+    i=0
+    if nodeA in Graph[nodeC] or nodeC in Graph[nodeA]:
+        i+=1
+    if nodeA in Graph[nodeB] or nodeB in Graph[nodeA]:
+        i+=1
+    if nodeB in Graph[nodeC] or nodeC in Graph[nodeB]:
+        i+=1
+    return i>=2
+    
+def process_subgraph(args):
+    Graph, u, v, w = args
+    if issubgraphconnected(Graph, u, v, w):
+        Subgraph = Graph.subgraph([u, v, w])
+        return f"{u}-{v}-{w}", findGroupGraph(Subgraph)
+    return None
+
+def subgraph3N_parallel(Graph, num_processes=4):
+    resDic = {}
+    nodes = list(Graph.nodes())
+    total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
+    
+    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
+        if i % 1000000 == 0:
+            print(f"Processed {i}/{total_combinations} combinations ({i/total_combinations*100:.2f}%)")
+        
+        if issubgraphconnected(Graph, u, v, w):
+            Subgraph = Graph.subgraph([u, v, w])
+            resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
+    
+    return resDic
 
 def main():
-    G = nx.scale_free_graph(10)
+    G = nx.scale_free_graph(1000)
     print(subgraph3N(G))
     nx.draw_circular(G,with_labels=True)
     plt.show()

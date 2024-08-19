@@ -11,7 +11,7 @@ Simulation dynamique de benchmarks de réseaux de régulation géniques pour l'e
 
 ## Introduction
 
-Ce projet permet de simuler dynamiquement des réseaux de régulation géniques (GRN) en utilisant des équations différentielles ordinaires (ODEs) et de générer des benchmarks pour l'entraînement et l'évaluation d'algorithmes d'inférence. Le projet supporte trois types d'ODEs : loi Action de Masse et loi de Hill.
+Ce projet permet de simuler dynamiquement des réseaux de régulation géniques (GRN) en utilisant des équations différentielles ordinaires (ODEs) et de générer des benchmarks pour l'entraînement et l'évaluation d'algorithmes d'inférence. Le projet supporte trois types d'ODEs : loi Action de Masse, la loi de Hill et une loi indirecte hybrides des deux premières.
 
 
 ## Installation
@@ -41,7 +41,7 @@ Ce projet permet de simuler dynamiquement des réseaux de régulation géniques 
 
 ## Utilisation
 
-### Exécution de la simulation
+### Exécution d'une simulation
 
 Vous pouvez exécuter une simulation en utilisant le notebook d'exemple `exemple.ipynb` :
 

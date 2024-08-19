@@ -5,9 +5,12 @@ import random as rd
 import numpy as np
 import pandas as pd
 import pkg_resources
-
-excel_path = pkg_resources.resource_filename("ochunGRN", "GRN/41598_2021_3625_MOESM5_ESM.xlsx") 
-document = pd.read_excel(excel_path)
+from genesGroupe import *
+if __name__ == "__main__":
+    document = pd.read_excel("ochunGRN/GRN/41598_2021_3625_MOESM5_ESM.xlsx")
+else :
+    excel_path = pkg_resources.resource_filename("ochunGRN", "GRN/41598_2021_3625_MOESM5_ESM.xlsx") 
+    document = pd.read_excel(excel_path)
 
 arabidopsisThaliana=(document["Supplementary Table S1: Networks. A spreadsheet file with filtered networks"].tolist()[2:],document["Unnamed: 1"].tolist()[2:], "Arabidopsis thaliana" )
 drosophilaMelanogaster=(document["Unnamed: 2"].tolist()[2:],document["Unnamed: 3"].tolist()[2:],"Drosophila Melanogaster")
@@ -43,6 +46,18 @@ def findDoubleRegulationGenes(GSpecies):
                 DoubleRegulationGenes.append((nodeA,nodeB))
     return (DoubleRegulationGenes, len(DoubleRegulationGenes)/GSpecies.number_of_edges())
 
+def FFLratio(Gspecies):
+    print(Gspecies.number_of_nodes(),Gspecies.number_of_edges())
+    print(nx.is_weakly_connected(Gspecies))
+    DictFFL = subgraph3N_parallel(Gspecies)
+    motifs = {v:0 for v in DictFFL.values()}
+    N=len(DictFFL)
+    print(N)
+    for i in DictFFL.keys():
+        motifs[DictFFL[i]]+=1
+    print(sorted(motifs.items(), key=lambda item: item[1]))
+    print(motifs['FFL']/N)
+
 
 def main():
     for species in [arabidopsisThaliana, drosophilaMelanogaster, escherichniaColi, homoSapiens, saccharomycesCerevisiae]:
@@ -56,9 +71,7 @@ def main():
         L=list(nx.clustering(GSpecies).items())
         print("moyenne coefficient de clustering", np.mean( [L[i][1] for i in range(GSpecies.number_of_nodes())]))
     
-    G = graphCreator(drosophilaMelanogaster)
-    L=list(nx.clustering(G).items())
-    print([L[i] for i in range(G.number_of_nodes())])
+    print("ratioFFL", FFLratio(graphCreator(homoSapiens)))
 
     options = {             
         'node_color': 'black',

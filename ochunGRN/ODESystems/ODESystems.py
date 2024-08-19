@@ -62,7 +62,7 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
         
         equation = lambda t,G: massAction(t, G, Ma)     
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        normalisation(solution.y)
+#        normalisation(solution.y)
         GenesDict["massActionY"] = solution.y
         GenesDict["massActionX"] = solution.t
     
@@ -71,7 +71,7 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
         Kdeg = Coeff["mRNAsDeg"]
         equation = lambda t,G: HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 2)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        normalisation(solution.y)
+#        normalisation(solution.y)
         GenesDict["HillY"] = solution.y
         GenesDict["HillX"] = solution.t
 
@@ -87,7 +87,7 @@ def simulationODEs(GenesDict:dict, ODEs:list, T:tuple, Coeff:dict=None):
             return indirect(t, mRNA, P, M, k_mRNA, k_P, Ka_P, K_degP, K_degMRNA, 2)
         G0_indirect = np.concatenate((G0, Coeff["ProtAvg"]))
         solution = solve_ivp(equation, [t0, tf], G0_indirect, max_step= 0.5)
-        normalisation(solution.y)
+#        normalisation(solution.y)
         GenesDict["indirectY"] = solution.y[:genesNb]
         GenesDict["indirectX"] = solution.t
 
