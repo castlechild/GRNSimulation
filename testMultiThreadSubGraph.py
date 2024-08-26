@@ -1,34 +1,29 @@
 import networkx as nx
-import numpy as np
-import matplotlib.pyplot as plt
 from itertools import combinations
 import multiprocessing
-import os
+# from multiprocessing import Pool
+from tqdm import tqdm
+import numpy as np
+import pandas as pd
+
+document = pd.read_excel("ochunGRN/GRN/41598_2021_3625_MOESM5_ESM.xlsx")
+
+arabidopsisThaliana = (document["Supplementary Table S1: Networks. A spreadsheet file with filtered networks"].tolist()[2:], document["Unnamed: 1"].tolist()[2:], "Arabidopsis thaliana")  # noqa: E501
+drosophilaMelanogaster = (document["Unnamed: 2"].tolist()[2:], document["Unnamed: 3"].tolist()[2:], "Drosophila Melanogaster")  # noqa: E501
+escherichniaColi = (document["Unnamed: 4"].tolist()[2:], document["Unnamed: 5"].tolist()[2:], "Escherichnia coli")  # noqa: E501
+homoSapiens = (document["Unnamed: 6"].tolist()[2:], document["Unnamed: 7"].tolist()[2:], "Homo sapiens")  # noqa: E501
+saccharomycesCerevisiae = (document["Unnamed: 8"].tolist()[2:], document["Unnamed: 9"].tolist()[2:], "Saccharomyces cerevisiae")  # noqa: E501
 
 
 def findGroupGraph(threeNGraph):
-    """
-    Identify the type of three-node subgraph (pattern) in a directed graph.
-
-    This function takes a three-node subgraph and classifies it based on its
-    structural patterns into one of the following types: "Fan-In", "Fan-Out",
-    "Cascade", "FFL", "Triangular", "C-D", "C-E", "SCascade", "dC", "dD", "dE",
-    "5edges", and "6edges".
-
-    Parameters:
-    - threeNGraph (networkx.DiGraph): The three-node subgraph to analyze.
-
-    Returns:
-    - str: The detected pattern type among the available options.
-    """
     threeNGraphWAuto = nx.DiGraph()
     edges = threeNGraph.edges()
     for u, v in edges:
         if u != v:
             threeNGraphWAuto.add_edge(u, v)
+
     edges = threeNGraphWAuto.edges()
     nEdges = threeNGraphWAuto.number_of_edges()
-
     if nEdges == 2:
         for u in threeNGraphWAuto:
             if threeNGraphWAuto.in_degree[u] == 2:
@@ -41,8 +36,8 @@ def findGroupGraph(threeNGraph):
         for u in threeNGraphWAuto:
             for v in threeNGraphWAuto:
                 if u != v and (u, v) not in edges and (v, u) not in edges:
-                    if (threeNGraphWAuto.in_degree[u] == 1 and
-                            threeNGraphWAuto.in_degree[v] == 1):
+                    if (threeNGraphWAuto.in_degree[u] == 1
+                            and threeNGraphWAuto.in_degree[v] == 1):
                         return "C-D"
                     else:
                         return "C-E"
@@ -75,23 +70,6 @@ def findGroupGraph(threeNGraph):
 
 
 def findGroupGraph2(adj_matrix):
-    """
-    Identifie le type de sous-graphe à trois nœuds (motif) dans un graphe
-    dirigé en utilisant sa matrice d'adjacence.
-
-    Cette fonction prend une matrice d'adjacence de sous-graphe à trois nœuds
-    et la classifie en fonction de ses motifs structurels parmi les options
-    suivantes :
-    "Fan-In", "Fan-Out", "Cascade", "FFL", "Triangular", "C-D", "C-E",
-    "SCascade", "dC", "dD", "dE", "5edges", et "6edges".
-
-    Paramètres :
-    - adj_matrix (numpy.ndarray): Matrice d'adjacence 3x3 représentant
-    le sous-graphe.
-
-    Retourne :
-    - str : Le type de motif détecté parmi les options disponibles.
-    """
     if adj_matrix.shape != (3, 3):
         raise ValueError("La matrice d'adjacence doit être de taille 3x3.")
     for i in range(3):
@@ -148,8 +126,8 @@ def subgraph3N(Graph):
     Extract and analyze all three-node subgraphs from a given graph.
 
     This function traverses a given graph, extracts all subgraphs containing
-    exactly three nodes, and uses the `findGroupGraph` function
-    to classify each one.
+    exactly three nodes, and uses the `findGroupGraph` function to classify
+    each one.
 
     Parameters:
     - Graph (networkx.Graph): The graph to analyze.
@@ -160,10 +138,13 @@ def subgraph3N(Graph):
     """
     resDic = {}
     nodes = list(Graph.nodes)
-    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
-        if issubgraphconnected(Graph, u, v, w):
-            Subgraph = nx.subgraph(Graph, [u, v, w])
-            resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
+    total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
+    with tqdm(total=total_combinations) as pbar:
+        for i, (u, v, w) in enumerate(combinations(nodes, 3)):
+            if issubgraphconnected(Graph, u, v, w):
+                Subgraph = nx.subgraph(Graph, [u, v, w])
+                resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
+            pbar.update(1)
     return resDic
 
 
@@ -175,36 +156,41 @@ def subgraph3N2(Graph):
         for j in range(len(nodes)):
             if adj_matrice[i][j] != 0:
                 adj_matrice[i][j] = 1
-    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
-        if issubgraphconnected(Graph, u, v, w):
-            adj_submatrice = adj_matrice[np.ix_([u, v, w], [u, v, w])]
-            resDic[f"{u}-{v}-{w}"] = findGroupGraph2(adj_submatrice)
+    total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
+    with tqdm(total=total_combinations) as pbar:
+        for i, (u, v, w) in enumerate(combinations(range(len(nodes)), 3)):
+            if issubgraphconnected(adj_matrice, u, v, w):
+                adj_submatrice = adj_matrice[np.ix_([u, v, w], [u, v, w])]
+                resDic[f"{u}-{v}-{w}"] = findGroupGraph2(adj_submatrice)
+            pbar.update(1)
     return resDic
 
 
-def issubgraphconnected(Graph, nodeA, nodeB, nodeC):
+def issubgraphconnected(adj_matrice, nodeA, nodeB, nodeC):
     i = 0
-    if nodeA in Graph[nodeC] or nodeC in Graph[nodeA]:
-        i += 1
-    if nodeA in Graph[nodeB] or nodeB in Graph[nodeA]:
-        i += 1
-    if nodeB in Graph[nodeC] or nodeC in Graph[nodeB]:
-        i += 1
+    i += int(adj_matrice[nodeA][nodeC]) | int(adj_matrice[nodeC][nodeA])
+    i += int(adj_matrice[nodeB][nodeC]) | int(adj_matrice[nodeC][nodeB])
+    i += int(adj_matrice[nodeA][nodeB]) | int(adj_matrice[nodeB][nodeA])
     return i >= 2
 
 
-def worker(tasks, adj_matrice, Graph, resDic):
+def worker(tasks, adj_matrice, resDic):
     for task in tasks:
         u, v, w = task
-        if issubgraphconnected(Graph, u, v, w):
+        if issubgraphconnected(adj_matrice, u, v, w):
             adj_submatrice = adj_matrice[np.ix_([u, v, w], [u, v, w])]
             resDic[f"{u}-{v}-{w}"] = findGroupGraph2(adj_submatrice)
 
 
 def chunk_tasks(tasks, chunk_size):
-    """Divise les tâches en morceaux de taille `chunk_size`."""
-    for i in range(0, len(tasks), chunk_size):
-        yield tasks[i:i + chunk_size]
+    chunk = []
+    for task in tasks:
+        chunk.append(task)
+        if len(chunk) == chunk_size:
+            yield chunk
+            chunk = []
+    if chunk:
+        yield chunk
 
 
 def subgraph3N_parallel(Graph):
@@ -218,62 +204,51 @@ def subgraph3N_parallel(Graph):
             if adj_matrice[i][j] != 0:
                 adj_matrice[i][j] = 1
 
-    tasks = list(combinations(nodes, 3))
-    coreNB = os.cpu_count()
-    maxTasks = 10
+    tasks = combinations(range(len(nodes)), 3)
+    coreNB = 1
+    maxTasks = 100
     chunks = chunk_tasks(tasks, maxTasks)
     processes = []
-    for chunk in chunks:
-        if len(processes) >= coreNB:
-            processes[0].join()
-            processes.pop(0)
-        p = multiprocessing.Process(target=worker,
-                                    args=(chunk, adj_matrice, Graph, resDic))
-        processes.append(p)
-        p.start()
-    for p in processes:
-        p.join()
+    total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
+    with tqdm(total=total_combinations) as pbar:
+        for chunk in chunks:
+            if len(processes) >= coreNB:
+                processes[0].join()
+                pbar.update(1)
+                processes.pop(0)
+            p = multiprocessing.Process(
+                target=worker, args=(chunk, adj_matrice, resDic))
+            processes.append(p)
+            p.start()
+        for p in processes:
+            p.join()
+            pbar.update(1)
     return resDic
 
 
+def FFLratio(Gspecies):
+    print(Gspecies.number_of_nodes(), Gspecies.number_of_edges())
+    print(nx.is_weakly_connected(Gspecies))
+    DictFFL = subgraph3N2(Gspecies)
+    motifs = {v: 0 for v in DictFFL.values()}
+    N = len(DictFFL)
+    print(N)
+    for i in DictFFL.keys():
+        motifs[DictFFL[i]] += 1
+    print(sorted(motifs.items(), key=lambda item: item[1]))
+    print(motifs['FFL']/N)
+
+
+def graphCreator(species):
+    N = len(species[0])
+    Graph = nx.DiGraph()
+    for i in range(N):
+        Graph.add_edge(species[0][i], species[1][i])
+    return Graph
+
+
 def main():
-    G = nx.scale_free_graph(10)
-    nx.draw_circular(G, with_labels=True)
-    print(subgraph3N(G))
-
-    print(subgraph3N2(G))
-    print(subgraph3N_parallel(G))
-
-    plt.show()
-    TGraph = [nx.DiGraph() for i in range(13)]
-    TGraph[0].add_edges_from([(0, 1), (1, 2), (2, 0)])
-    TGraph[1].add_edges_from([(1, 0), (1, 2), (2, 0)])
-    TGraph[2].add_edges_from([(0, 1), (1, 2)])
-    TGraph[3].add_edges_from([(1, 0), (1, 2)])
-    TGraph[4].add_edges_from([(0, 1), (2, 1)])
-    TGraph[5].add_edges_from([(0, 1), (1, 2), (2, 0), (0, 2)])
-    TGraph[6].add_edges_from([(1, 0), (1, 2), (2, 0), (0, 2)])
-    TGraph[7].add_edges_from([(0, 1), (2, 1), (2, 0), (0, 2)])
-    TGraph[8].add_edges_from([(0, 1), (1, 2), (2, 1)])
-    TGraph[9].add_edges_from([(0, 1), (1, 2), (1, 0)])
-    TGraph[10].add_edges_from([(0, 1), (1, 2), (1, 0), (2, 1)])
-    TGraph[11].add_edges_from([(0, 1), (1, 2), (1, 0), (2, 1), (2, 0)])
-    TGraph[12].add_edges_from([(0, 1), (1, 2), (1, 0), (2, 1), (2, 0), (0, 2)])
-    for i in range(3):
-        plt.subplot(3, 5, i+2)
-        nx.draw_circular(TGraph[i], arrowsize=30)
-        plt.title(findGroupGraph(TGraph[i]))
-    for i in range(5):
-        plt.subplot(3, 5, i+6)
-        nx.draw_circular(TGraph[i+3], arrowsize=30)
-        plt.title(findGroupGraph(TGraph[i+3]))
-    for i in range(5):
-        plt.subplot(3, 5, i+11)
-        nx.draw_circular(TGraph[i+8], arrowsize=30)
-        plt.title(findGroupGraph(TGraph[i+8]))
-    manager = plt.get_current_fig_manager()
-    manager.full_screen_toggle()
-    plt.savefig("Melvin/Images/allGroups.png")
+    print("ratioFFL", FFLratio(graphCreator(drosophilaMelanogaster)))
 
 
 if __name__ == "__main__":

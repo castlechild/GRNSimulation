@@ -5,6 +5,7 @@ from coefficientFinder import getCoefficient
 from massAction import MaMatrice, massAction
 from Hill import HillEquation
 from indirect import indirect
+from noise import physicalNoise, dropOut
 
 
 def simulationODEs(GenesDict: dict, ODEs: list, T: tuple, Coeff: dict = None):
@@ -72,9 +73,11 @@ def simulationODEs(GenesDict: dict, ODEs: list, T: tuple, Coeff: dict = None):
         K = np.resize(RatioCoeff, (genesNb, genesNb))
         Ma = MaMatrice(np.transpose(M), K)
 
-        def equation(t, G): massAction(t, G, Ma)
+        def equation(t, G): return massAction(t, G, Ma)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
 #        normalisation(solution.y)
+        physicalNoise(solution.y, 2)
+        dropOut(solution.y, 0.02)
         GenesDict["massActionY"] = solution.y
         GenesDict["massActionX"] = solution.t
 
@@ -82,9 +85,12 @@ def simulationODEs(GenesDict: dict, ODEs: list, T: tuple, Coeff: dict = None):
         K = Coeff["TranscriptionsRate"]
         Kdeg = Coeff["mRNAsDeg"]
 
-        def equation(t, G): HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 2)
+        def equation(t, G): return HillEquation(t, G, M, K, G0,
+                                                [0]*genesNb, Kdeg, 2)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
 #        normalisation(solution.y)
+        physicalNoise(solution.y, 2)
+        dropOut(solution.y, 0.02)
         GenesDict["HillY"] = solution.y
         GenesDict["HillX"] = solution.t
 
@@ -103,6 +109,8 @@ def simulationODEs(GenesDict: dict, ODEs: list, T: tuple, Coeff: dict = None):
         G0_indirect = np.concatenate((G0, Coeff["ProtAvg"]))
         solution = solve_ivp(equation, [t0, tf], G0_indirect, max_step=0.5)
 #        normalisation(solution.y)
+        physicalNoise(solution.y, 20)
+        dropOut(solution.y, 0.02)
         GenesDict["indirectY"] = solution.y[:genesNb]
         GenesDict["indirectX"] = solution.t
 
