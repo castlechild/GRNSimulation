@@ -16,6 +16,10 @@ def massAction(t, G, A):
     del t
     return np.dot(A, G)
 
+
+def massAction2(t, G, Adj, k):
+    pass
+
 #####################################################################
 
 

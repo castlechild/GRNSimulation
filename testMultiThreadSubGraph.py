@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import networkx as nx
 from itertools import combinations
 import multiprocessing
@@ -152,14 +153,17 @@ def subgraph3N2(Graph):
     resDic = {}
     nodes = list(Graph.nodes)
     adj_matrice = nx.to_numpy_array(Graph)
+    adj_matrice_undi = np.zeros(np.shape(adj_matrice))
     for i in range(len(nodes)):
         for j in range(len(nodes)):
             if adj_matrice[i][j] != 0:
                 adj_matrice[i][j] = 1
+                adj_matrice_undi[i][j] = 1
+                adj_matrice_undi[j][i] = 1
     total_combinations = len(nodes) * (len(nodes) - 1) * (len(nodes) - 2) // 6
     with tqdm(total=total_combinations) as pbar:
         for i, (u, v, w) in enumerate(combinations(range(len(nodes)), 3)):
-            if issubgraphconnected(adj_matrice, u, v, w):
+            if issubgraphconnected(adj_matrice_undi, u, v, w):
                 adj_submatrice = adj_matrice[np.ix_([u, v, w], [u, v, w])]
                 resDic[f"{u}-{v}-{w}"] = findGroupGraph2(adj_submatrice)
             pbar.update(1)
@@ -167,11 +171,7 @@ def subgraph3N2(Graph):
 
 
 def issubgraphconnected(adj_matrice, nodeA, nodeB, nodeC):
-    i = 0
-    i += int(adj_matrice[nodeA][nodeC]) | int(adj_matrice[nodeC][nodeA])
-    i += int(adj_matrice[nodeB][nodeC]) | int(adj_matrice[nodeC][nodeB])
-    i += int(adj_matrice[nodeA][nodeB]) | int(adj_matrice[nodeB][nodeA])
-    return i >= 2
+    return int(adj_matrice[nodeA][nodeC]) + int(adj_matrice[nodeB][nodeC]) + int(adj_matrice[nodeA][nodeB]) >= 2  # noqa: E501
 
 
 def worker(tasks, adj_matrice, resDic):
@@ -248,7 +248,8 @@ def graphCreator(species):
 
 
 def main():
-    print("ratioFFL", FFLratio(graphCreator(drosophilaMelanogaster)))
+    for species in [homoSapiens, drosophilaMelanogaster, escherichniaColi, saccharomycesCerevisiae, arabidopsisThaliana]:  # noqa: E501
+        print("ratioFFL", FFLratio(graphCreator(species)))
 
 
 if __name__ == "__main__":

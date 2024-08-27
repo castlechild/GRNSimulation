@@ -1,0 +1,34 @@
+drosophilaMelanogaster:  
+   Nombre de noeuds : 868
+   Nombre d'arrêtes : 14320
+          Execution : 100%|█| 108 618 916/108 618 916 [03:49<00:00, 472354.84it/s] 
+   Nombre de motifs : 2 774 805
+   [('5edges', 1), ('dE', 30), ('dD', 45), ('C-E', 49), ('C-D', 281), ('FFL', 4 844), ('Cascade', 5 452), ('Fan-In', 161 957), ('Fan-Out', 2 602 146)]
+          ratio FFL : 0.0017457082569766163
+
+
+escherichniaColi:
+   Nombre de noeuds : 1641
+   Nombre d'arrêtes : 3555
+          Execution : 100%|█| 735 157 060/735 157 060 [18:46<00:00, 652631.30it/s] 
+   Nombre de motifs : 248 967
+   [('5edges', 1), ('6edges', 1), ('dC', 3), ('dD', 20), ('C-E', 53), ('dE', 257), ('FFL', 975), ('C-D', 1 113), ('Fan-In', 2 767), ('Cascade', 2 820), ('Fan-Out', 240 957)]
+          ratio FFL : 0.003916181662629987
+
+
+homoSapiens:
+   Nombre de noeuds : 2546
+   Nombre d'arrêtes : 9592
+          Execution : 100%|█| 2 747 337 680/2 747 337 680 [1:11:33<00:00, 639825.49it/s] 
+   Nombre de motifs : 2 284 607
+   [('dD', 1), ('dC', 2), ('dE', 4), ('Triangular', 5), ('C-E', 22), ('C-D', 1 543), ('FFL', 3 761), ('Cascade', 17 044), ('Fan-In', 31 260), ('Fan-Out', 2 230 965)]
+          ratio FFL : 0.0016462349979668276
+
+
+arabidopsisThaliana:
+   Nombre de noeuds : 3692
+   Nombre d'arrêtes : 4396
+          Execution : 100%|█| 5 410 292 635/5 410 292 635 [3:11:48<00:00, 470132.02it/s]
+   Nombre de motifs2 130 303
+   [('Triangular', 1), ('5edges', 1), ('SCascade', 2), ('dC', 5), ('dD', 9), ('C-E', 64), ('dE', 1116), ('C-D', 3463), ('FFL', 4740), ('Cascade', 16282), ('Fan-In', 23681), ('Fan-Out', 2080939)]
+          ratio FFL : 0.0022250355935282446

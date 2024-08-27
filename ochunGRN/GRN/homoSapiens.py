@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import pkg_resources
+import matplotlib.pyplot as plt
 from genesGroupe import subgraph3N_parallel
 if __name__ == "__main__":
     document = pd.read_excel("ochunGRN/GRN/41598_2021_3625_MOESM5_ESM.xlsx")
@@ -13,8 +14,7 @@ else:
     document = pd.read_excel(excel_path)
 
 arabidopsisThaliana = (
-    document["""Supplementary Table S1: Networks.A spreadsheet
-             file with filtered networks"""].tolist()[2:],
+    document["""Supplementary Table S1: Networks. A spreadsheet file with filtered networks"""].tolist()[2:],  # noqa: E501
     document["Unnamed: 1"].tolist()[2:], "Arabidopsis thaliana")
 drosophilaMelanogaster = (document["Unnamed: 2"].tolist()[2:],
                           document["Unnamed: 3"].tolist()[2:],
@@ -74,6 +74,49 @@ def FFLratio(Gspecies):
     print(motifs['FFL']/N)
 
 
+def autoRegDistribution(Gspecies, GroupNb):
+    Dictauto = {}
+    Dicttot = {}
+    degree = list(Gspecies.degree())
+    Ldegree = [degree[i][1] for i in range(len(degree))]
+    Ldegree.sort()
+    GeneNB = Gspecies.number_of_nodes()
+    LPivot = [Ldegree[int(i*GeneNB/(GroupNb+1))] for i in range(1, GroupNb)]
+    print(LPivot)
+    for node in Gspecies:
+        valGroup = 0
+        deg = Gspecies.degree(node)
+        while valGroup < GroupNb-1 and deg > LPivot[valGroup]:
+            valGroup += 1
+        if node in Gspecies.successors(node):
+            if valGroup in Dictauto:
+                Dictauto[valGroup] += 1
+            else:
+                Dictauto[valGroup] = 1
+        if valGroup in Dicttot:
+            Dicttot[valGroup] += 1
+        else:
+            Dicttot[valGroup] = 1
+    Lauto = sorted(Dictauto.items())
+    print(Lauto)
+    X, Y = [], []
+    for item in Lauto:
+        deg = item[0]
+        X.append(str(item[0]))
+        Y.append(item[1])
+        Y[-1] /= Dicttot[deg]
+    plt.bar(X, Y)
+    plt.show()
+
+
+def node10Degree(Gspecies):
+    res = []
+    for node in Gspecies:
+        if Gspecies.degree(node) > 10:
+            res.append(node)
+    return res
+
+
 def main():
     for species in [arabidopsisThaliana, drosophilaMelanogaster,
                     escherichniaColi, homoSapiens, saccharomycesCerevisiae]:
@@ -87,7 +130,8 @@ def main():
         L = list(nx.clustering(GSpecies).items())
         print("moyenne coefficient de clustering", np.mean(
             [L[i][1] for i in range(GSpecies.number_of_nodes())]))
-    print("ratioFFL", FFLratio(graphCreator(homoSapiens)))
+        print("Auto Rg distribution :", autoRegDistribution(GSpecies, 100))
+        print("Noeuds ayant un degré de 10min:", node10Degree(GSpecies))
 
 # options = {
 #     'node_color': 'black',

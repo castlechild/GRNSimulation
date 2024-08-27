@@ -43,7 +43,7 @@ def plotGraph(GenesDict, actInhPlotBool=False, saveName=None):
         plt.savefig(saveName)
 
 
-def plotSim(GenesDict, saveName=None):
+def plotSim(GenesDict, ODEs=None, saveName=None):
     """
     Plot the simulation results of the ODEs for the gene regulatory network.
 
@@ -61,7 +61,10 @@ def plotSim(GenesDict, saveName=None):
     - None: The graph is displayed or saved depending on the parameters.
     """
     font = {'family': 'serif', 'color': 'darkred', 'size': 8}
-    ODEs = GenesDict["ODEs"]
+    if ODEs is None:
+        ODEs = GenesDict["ODEs"]
+    if isinstance(ODEs, str):
+        ODEs = [ODEs]
     genesNb = GenesDict["genesNb"]
     for i in range(len(ODEs)):
         plt.subplot(len(ODEs), 1, i+1)
