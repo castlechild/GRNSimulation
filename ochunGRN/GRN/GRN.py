@@ -1,5 +1,5 @@
 from GRNCreationUtils import meanClustering, BarabasiAlbertAlgorithm
-from GRNCreationUtils import adjacenteDiMatriceFromGraph, addColors
+from GRNCreationUtils import adjacenteDiMatriceStaredFromGraph, addColors
 from genesGroupe import subgraph3N
 import networkx as nx
 
@@ -27,7 +27,7 @@ def randomGrn(genesNb: int, autoRG: float, duoRG: float, resDict: dict = None):
     if resDict is None:
         resDict = {}
     Graph = BarabasiAlbertAlgorithm(genesNb, 2)
-    Graph, M = adjacenteDiMatriceFromGraph(Graph, autoRG, duoRG)
+    Graph, M = adjacenteDiMatriceStaredFromGraph(Graph, autoRG, duoRG)
     resDict["Graph"] = Graph
     resDict["genesNb"] = genesNb
     resDict["autoRG"], resDict["duoRG"] = autoRG, duoRG

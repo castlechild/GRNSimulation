@@ -6,6 +6,7 @@ import multiprocessing
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
+import time
 
 document = pd.read_excel("ochunGRN/GRN/41598_2021_3625_MOESM5_ESM.xlsx")
 
@@ -170,8 +171,43 @@ def subgraph3N2(Graph):
     return resDic
 
 
+def subgraph3N3(Graph):
+    resDic = {}
+    nodes = list(Graph.nodes)
+    edges = list(Graph.edges)
+    adj_matrice = nx.to_numpy_array(Graph)
+    adj_matrice_undi = np.zeros(np.shape(adj_matrice))
+    DictPos = {}
+    cache = set()
+    for i in range(len(nodes)):
+        DictPos[nodes[i]] = i
+        for j in range(len(nodes)):
+            if adj_matrice[i][j] != 0:
+                adj_matrice[i][j] = 1
+                adj_matrice_undi[i][j] = 1
+                adj_matrice_undi[j][i] = 1
+    for u, v in edges:
+        for w in set(Graph[v]).union(Graph.pred[v], Graph[u], Graph.pred[u]):
+            if u != v != w != u:
+                triplet = tuple(sorted([w, u, v]))
+                if triplet not in cache:
+                    cache.add(tuple(sorted([w, u, v])))
+                    if issubgraphconnected2(adj_matrice_undi, DictPos[u],
+                                            DictPos[v], DictPos[w]):
+                        adj_submatrice = adj_matrice[
+                            np.ix_([DictPos[u], DictPos[v], DictPos[w]],
+                                   [DictPos[u], DictPos[v], DictPos[w]])]
+                        resDic[f"{u}-{v}-{w}"] = findGroupGraph2(
+                            adj_submatrice)
+    return resDic
+
+
 def issubgraphconnected(adj_matrice, nodeA, nodeB, nodeC):
     return int(adj_matrice[nodeA][nodeC]) + int(adj_matrice[nodeB][nodeC]) + int(adj_matrice[nodeA][nodeB]) >= 2  # noqa: E501
+
+
+def issubgraphconnected2(adj_matrice, nodeEdgeA, nodeEdgeB, node):
+    return bool(adj_matrice[node][nodeEdgeA]) or bool(adj_matrice[node][nodeEdgeB])  # noqa: E501
 
 
 def worker(tasks, adj_matrice, resDic):
@@ -229,7 +265,10 @@ def subgraph3N_parallel(Graph):
 def FFLratio(Gspecies):
     print(Gspecies.number_of_nodes(), Gspecies.number_of_edges())
     print(nx.is_weakly_connected(Gspecies))
-    DictFFL = subgraph3N2(Gspecies)
+    tps1 = time.time()
+    DictFFL = subgraph3N3(Gspecies)
+    tps2 = time.time()
+    print("temps execution:", tps2-tps1)
     motifs = {v: 0 for v in DictFFL.values()}
     N = len(DictFFL)
     print(N)
@@ -249,7 +288,8 @@ def graphCreator(species):
 
 def main():
     for species in [homoSapiens, drosophilaMelanogaster, escherichniaColi, saccharomycesCerevisiae, arabidopsisThaliana]:  # noqa: E501
-        print("ratioFFL", FFLratio(graphCreator(species)))
+        FFLratio(graphCreator(species))
+        print("\n")
 
 
 if __name__ == "__main__":

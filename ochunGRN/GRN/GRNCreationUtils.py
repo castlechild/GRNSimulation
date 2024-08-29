@@ -78,6 +78,32 @@ def adjacenteDiMatriceFromGraph(G, autoRG, duoRG):
     return (DiG, M)
 
 
+def adjacenteDiMatriceStaredFromGraph(G, autoRG, duoRG):
+    DiG = nx.DiGraph()
+    DiG.add_nodes_from(G)
+    degree_dict = dict(G.degree())
+    motherNode = max(degree_dict, key=degree_dict.get)
+    distance = nx.shortest_path_length(G, motherNode)
+    cache = set()
+    for nodeA in distance:
+        for nodeB in G[nodeA]:
+            edge = (nodeA, nodeB)
+            if edge not in cache:
+                cache.add(edge)
+                cache.add(edge[::-1])
+                rdNumber = rd.random()
+                if rdNumber < duoRG:
+                    DiG.add_edges_from((edge, edge[::-1]), color='black')
+                else:
+                    DiG.add_edges_from([edge], color='blue')
+        rdNumber = rd.random()
+        if rdNumber < autoRG:
+            DiG.add_edge(nodeA, nodeA, color='gray')
+    M = nx.to_numpy_array(DiG)
+    addActivationInhibition(DiG, M)
+    return (DiG, M)
+
+
 def addActivationInhibition(G, M):
     for u, v in G.edges():
         inhibitionBool = rd.random() < 0.5
@@ -143,7 +169,7 @@ def main():
     plt.subplot(121)
     nx.draw(G, with_labels=True, font_weight='bold')
     plt.subplot(122)
-    DiG = adjacenteDiMatriceFromGraph(G, autoRG, duoRG)[0]
+    DiG = adjacenteDiMatriceStaredFromGraph(G, autoRG, duoRG)[0]
     edges = DiG.edges()
     colors = [DiG[u][v]['color'] for u, v in edges]
     nx.draw_kamada_kawai(DiG, with_labels=True,

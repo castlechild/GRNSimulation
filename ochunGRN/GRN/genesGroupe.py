@@ -1,80 +1,9 @@
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-from itertools import combinations
-import multiprocessing
-import os
 
 
-def findGroupGraph(threeNGraph):
-    """
-    Identify the type of three-node subgraph (pattern) in a directed graph.
-
-    This function takes a three-node subgraph and classifies it based on its
-    structural patterns into one of the following types: "Fan-In", "Fan-Out",
-    "Cascade", "FFL", "Triangular", "C-D", "C-E", "SCascade", "dC", "dD", "dE",
-    "5edges", and "6edges".
-
-    Parameters:
-    - threeNGraph (networkx.DiGraph): The three-node subgraph to analyze.
-
-    Returns:
-    - str: The detected pattern type among the available options.
-    """
-    threeNGraphWAuto = nx.DiGraph()
-    edges = threeNGraph.edges()
-    for u, v in edges:
-        if u != v:
-            threeNGraphWAuto.add_edge(u, v)
-    edges = threeNGraphWAuto.edges()
-    nEdges = threeNGraphWAuto.number_of_edges()
-
-    if nEdges == 2:
-        for u in threeNGraphWAuto:
-            if threeNGraphWAuto.in_degree[u] == 2:
-                return "Fan-In"
-            elif threeNGraphWAuto.out_degree[u] == 2:
-                return "Fan-Out"
-        return "Cascade"
-
-    elif nEdges == 3:
-        for u in threeNGraphWAuto:
-            for v in threeNGraphWAuto:
-                if u != v and (u, v) not in edges and (v, u) not in edges:
-                    if (threeNGraphWAuto.in_degree[u] == 1 and
-                            threeNGraphWAuto.in_degree[v] == 1):
-                        return "C-D"
-                    else:
-                        return "C-E"
-        for u in threeNGraphWAuto:
-            if threeNGraphWAuto.in_degree[u] == 2:
-                return "FFL"
-        return "Triangular"
-
-    elif nEdges == 4:
-        for u in threeNGraphWAuto:
-            for v in threeNGraphWAuto:
-                if u != v and (u, v) not in edges and (v, u) not in edges:
-                    return "SCascade"
-        for u in threeNGraphWAuto:
-            if threeNGraphWAuto.degree[u] == 2:
-                if threeNGraphWAuto.in_degree[u] == 2:
-                    return "dE"
-                elif threeNGraphWAuto.out_degree[u] == 2:
-                    return "dD"
-                return "dC"
-        raise
-
-    elif nEdges == 5:
-        return "5edges"
-
-    elif nEdges == 6:
-        return "6edges"
-
-    raise ValueError("Unclassified graph pattern")
-
-
-def findGroupGraph2(adj_matrix):
+def findGroupGraph(adj_matrix):
     """
     Identifie le type de sous-graphe à trois nœuds (motif) dans un graphe
     dirigé en utilisant sa matrice d'adjacence.
@@ -144,105 +73,53 @@ def findGroupGraph2(adj_matrix):
 
 
 def subgraph3N(Graph):
-    """
-    Extract and analyze all three-node subgraphs from a given graph.
-
-    This function traverses a given graph, extracts all subgraphs containing
-    exactly three nodes, and uses the `findGroupGraph` function
-    to classify each one.
-
-    Parameters:
-    - Graph (networkx.Graph): The graph to analyze.
-
-    Returns:
-    - dict: A dictionary where the keys are the types of patterns found and
-    the values are the counts of each type.
-    """
     resDic = {}
     nodes = list(Graph.nodes)
-    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
-        if issubgraphconnected(Graph, u, v, w):
-            Subgraph = nx.subgraph(Graph, [u, v, w])
-            resDic[f"{u}-{v}-{w}"] = findGroupGraph(Subgraph)
-    return resDic
-
-
-def subgraph3N2(Graph):
-    resDic = {}
-    nodes = list(Graph.nodes)
+    edges = list(Graph.edges)
     adj_matrice = nx.to_numpy_array(Graph)
+    adj_matrice_undi = np.zeros(np.shape(adj_matrice))
+    DictPos = {}
+    cache = set()
     for i in range(len(nodes)):
+        DictPos[nodes[i]] = i
         for j in range(len(nodes)):
             if adj_matrice[i][j] != 0:
                 adj_matrice[i][j] = 1
-    for i, (u, v, w) in enumerate(combinations(nodes, 3)):
-        if issubgraphconnected(Graph, u, v, w):
-            adj_submatrice = adj_matrice[np.ix_([u, v, w], [u, v, w])]
-            resDic[f"{u}-{v}-{w}"] = findGroupGraph2(adj_submatrice)
+                adj_matrice_undi[i][j] = 1
+                adj_matrice_undi[j][i] = 1
+    print(edges)
+    for u, v in edges:
+        for w in set(Graph[v]).union(Graph.pred[v], Graph[u], Graph.pred[u]):
+            if u != v != w != u:
+                triplet = tuple(sorted([w, u, v]))
+                if triplet not in cache:
+                    cache.add(tuple(sorted([w, u, v])))
+                    if issubgraphconnected(adj_matrice_undi, DictPos[u],
+                                           DictPos[v], DictPos[w]):
+                        adj_submatrice = adj_matrice[
+                            np.ix_([DictPos[u], DictPos[v], DictPos[w]],
+                                   [DictPos[u], DictPos[v], DictPos[w]])]
+                        resDic[f"{u}-{v}-{w}"] = findGroupGraph(
+                            adj_submatrice)
     return resDic
 
 
-def issubgraphconnected(Graph, nodeA, nodeB, nodeC):
-    i = 0
-    if nodeA in Graph[nodeC] or nodeC in Graph[nodeA]:
-        i += 1
-    if nodeA in Graph[nodeB] or nodeB in Graph[nodeA]:
-        i += 1
-    if nodeB in Graph[nodeC] or nodeC in Graph[nodeB]:
-        i += 1
-    return i >= 2
-
-
-def worker(tasks, adj_matrice, Graph, resDic):
-    for task in tasks:
-        u, v, w = task
-        if issubgraphconnected(Graph, u, v, w):
-            adj_submatrice = adj_matrice[np.ix_([u, v, w], [u, v, w])]
-            resDic[f"{u}-{v}-{w}"] = findGroupGraph2(adj_submatrice)
-
-
-def chunk_tasks(tasks, chunk_size):
-    """Divise les tâches en morceaux de taille `chunk_size`."""
-    for i in range(0, len(tasks), chunk_size):
-        yield tasks[i:i + chunk_size]
-
-
-def subgraph3N_parallel(Graph):
-    manager = multiprocessing.Manager()
-    resDic = manager.dict()
-    nodes = list(Graph.nodes)
-    adj_matrice = nx.to_numpy_array(Graph)
-
-    for i in range(len(nodes)):
-        for j in range(len(nodes)):
-            if adj_matrice[i][j] != 0:
-                adj_matrice[i][j] = 1
-
-    tasks = list(combinations(nodes, 3))
-    coreNB = os.cpu_count()
-    maxTasks = 10
-    chunks = chunk_tasks(tasks, maxTasks)
-    processes = []
-    for chunk in chunks:
-        if len(processes) >= coreNB:
-            processes[0].join()
-            processes.pop(0)
-        p = multiprocessing.Process(target=worker,
-                                    args=(chunk, adj_matrice, Graph, resDic))
-        processes.append(p)
-        p.start()
-    for p in processes:
-        p.join()
-    return resDic
+def issubgraphconnected(adj_matrice, nodeEdgeA, nodeEdgeB, node):
+    return bool(adj_matrice[node][nodeEdgeA]) or bool(adj_matrice[node][nodeEdgeB])  # noqa: E501
 
 
 def main():
-    G = nx.scale_free_graph(10)
+    AdjMatrice = np.array([[0, 0, -1, 0, 0, 0, 0, 0],
+                           [0, 0, -1, 0, -1, -1, 0, 0],
+                           [0, 1, 0, 1, 0, -1, -1, 0],
+                           [0, -1, 1, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 0, 0, 0, 0, 0],
+                           [0, 0, 1, 0, 0, 0, 0, 0],
+                           [-1, 0, 1, 0, 0, 0, 0, 1],
+                           [0, 0, 0, 0, 1, 0, 0, 0]])
+    G = nx.from_numpy_array(AdjMatrice, create_using=nx.DiGraph)
     nx.draw_circular(G, with_labels=True)
     print(subgraph3N(G))
-
-    print(subgraph3N2(G))
-    print(subgraph3N_parallel(G))
 
     plt.show()
     TGraph = [nx.DiGraph() for i in range(13)]
@@ -262,15 +139,15 @@ def main():
     for i in range(3):
         plt.subplot(3, 5, i+2)
         nx.draw_circular(TGraph[i], arrowsize=30)
-        plt.title(findGroupGraph(TGraph[i]))
+        plt.title(findGroupGraph(nx.to_numpy_array(TGraph[i])))
     for i in range(5):
         plt.subplot(3, 5, i+6)
         nx.draw_circular(TGraph[i+3], arrowsize=30)
-        plt.title(findGroupGraph(TGraph[i+3]))
+        plt.title(findGroupGraph(nx.to_numpy_array(TGraph[i+3])))
     for i in range(5):
         plt.subplot(3, 5, i+11)
         nx.draw_circular(TGraph[i+8], arrowsize=30)
-        plt.title(findGroupGraph(TGraph[i+8]))
+        plt.title(findGroupGraph(nx.to_numpy_array(TGraph[i+8])))
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
     plt.savefig("Melvin/Images/allGroups.png")
