@@ -15,20 +15,20 @@ def indirect(t, mRNA, P, Adj, k_mRNA, k_P, Ka_P, K_degP,
         # Terme de production et dégradation pour les protéines
         production_protein = k_mRNA[i]*mRNA[i]
         degradation_protein = K_degP[i]*P[i]
-        dP[i] = production_protein - degradation_protein
 
         # Terme de production et dégradation pour les ARNm
         production_mRNA = k_P[i]
         for j in range(genesNb):
             stateEdge = Adj[j][i]
             if stateEdge == 1:
-                dP[i] -= k_mRNA[j]*P[i]
+                degradation_protein += k_mRNA[j]*P[i]
                 production_mRNA *= Hill_activation(P[j], Ka_P[j], n)
             elif stateEdge == -1:
-                dP[i] -= k_mRNA[j]*P[i]
+                degradation_protein += k_mRNA[j]*P[i]
                 production_mRNA *= Hill_inhibition(P[j], Ka_P[j], n)
         degradation_mRNA = K_degMRNA[i] * mRNA[i]
 
+        dP[i] = production_protein - degradation_protein
         dmNRA[i] = production_mRNA - degradation_mRNA
 
         # Ajout du terme de bruit stochastique

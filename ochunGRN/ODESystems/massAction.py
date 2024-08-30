@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+from noise import stochastiqueNoise
 # from noise import stochastiqueNoise
 
 
@@ -17,8 +18,23 @@ def massAction(t, G, A):
     return np.dot(A, G)
 
 
-def massAction2(t, G, Adj, k):
-    pass
+def massAction2(t, G, Adj, k, noise_amplitude=2):
+    del t
+    genesNb = len(G)
+    dG = np.zeros(genesNb)
+    for i in range(genesNb):
+        production, degradation = 0, 0
+        for j in range(genesNb):
+            stateEdgeprod = Adj[j][i]
+            if stateEdgeprod != 0:
+                production += G[j]*k[j]
+            stateEdgedeg = Adj[i][j]
+            if stateEdgedeg != 0:
+                degradation += G[i]*k[j]
+        dG[i] = production - degradation
+        noise = stochastiqueNoise(production, degradation, noise_amplitude)
+        dG[i] += noise
+    return dG
 
 #####################################################################
 

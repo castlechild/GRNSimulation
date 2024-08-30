@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 from coefficientFinder import getCoefficient
-from massAction import MaMatrice, massAction
+from massAction import MaMatrice, massAction, massAction2
 from Hill import HillEquation
 from indirect import indirect
 from noise import physicalNoise, dropOut, dataSelector
@@ -11,7 +11,7 @@ from noise import physicalNoise, dropOut, dataSelector
 def simulationODEs(GenesDict: dict,
                    ODEs: any,
                    T: tuple,
-                   Coeff: dict = None,
+                   Coeff: dict | None = None,
                    normalisationBool: bool = False):
     """
     Simulate the temporal evolution of a gene regulatory network using
@@ -77,12 +77,27 @@ def simulationODEs(GenesDict: dict,
         def equation(t, G): return massAction(t, G, Ma)
         solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
         dataY, dataX = dataSelector(solution.y, solution.t, 200)
-        physicalNoise(dataY, 0.5)
+        physicalNoise(dataY, 0)
         if normalisationBool:
             normalisation(dataY)
         dropOut(dataY, 0.02)
         GenesDict["massActionY"] = dataY
         GenesDict["massActionX"] = dataX
+
+    if "massAction" in ODEs:
+        GenesDict["ODEs"].append("massAction2")
+        K = [Coeff["TranscriptionsRate"][i]/Coeff["mRNAAvg"][i]
+             for i in range(genesNb)]
+
+        def equation(t, G): return massAction2(t, G, M, K, 0)
+        solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
+        dataY, dataX = dataSelector(solution.y, solution.t, 200)
+        physicalNoise(dataY, 0)
+        if normalisationBool:
+            normalisation(dataY)
+        dropOut(dataY, 0.02)
+        GenesDict["massAction2Y"] = dataY
+        GenesDict["massAction2X"] = dataX
 
     if "Hill" in ODEs:
         K = Coeff["TranscriptionsRate"]
@@ -140,3 +155,11 @@ def normalisation(YLists):
         if ratio != 0:
             for j in range(listSize):
                 YLists[i][j] /= ratio
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()

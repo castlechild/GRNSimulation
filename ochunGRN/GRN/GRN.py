@@ -79,3 +79,11 @@ def GrnFromAdj(AdjMatrice, resDict: dict = None):
     resDict["meanClustering"] = meanClustering(Graph)
     resDict["subGraph"] = subgraph3N(Graph)
     return resDict
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()

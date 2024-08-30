@@ -81,3 +81,11 @@ def plotSim(GenesDict, ODEs=None, saveName=None):
     plt.figlegend(handles, labels, loc='upper right')
     if saveName is not None:
         plt.savefig(saveName)
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()
