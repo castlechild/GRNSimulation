@@ -1,8 +1,8 @@
 from GRNCreationUtils import meanClustering, BarabasiAlbertAlgorithm
 from GRNCreationUtils import adjacenteDiMatriceStaredFromGraph, addColors
-from genesGroupe import subgraph3N
+from ochunGRN.GRN.genesGroup import subgraph3N
 import networkx as nx
-import numpy.typing as npt
+import numpy as np
 
 
 def randomGrn(genesNb: int,
@@ -21,8 +21,8 @@ def randomGrn(genesNb: int,
     - genesNb (int): The number of genes (nodes) in the network.
     - autoRG (float): The rate of self-regulation in the network.
     - duoRG (float): The regulation rate between pairs of genes.
-    - resDict (dict, optional): A dictionary to store the results.
-    If no dictionary is provided, a new one is created.
+    - resDict (dict, optional): A dictionary to store the results. If no dictionary is provided, a new one is created.
+    # noqa: E501
 
     Returns:
     - dict: A dictionary containing the generated graph, adjacency matrix,
@@ -30,7 +30,11 @@ def randomGrn(genesNb: int,
     """
     if resDict is None:
         resDict = {}
+
+    # Generate the initial graph using the Barabasi-Albert model
     Graph = BarabasiAlbertAlgorithm(genesNb, 2)
+
+    # Store results in the provided or new dictionary
     Graph, M = adjacenteDiMatriceStaredFromGraph(Graph, autoRG, duoRG)
     resDict["Graph"] = Graph
     resDict["genesNb"] = genesNb
@@ -38,10 +42,11 @@ def randomGrn(genesNb: int,
     resDict["AdjMatrice"] = M
     resDict["meanClustering"] = meanClustering(Graph)
     resDict["subGraph"] = subgraph3N(Graph)
+
     return resDict
 
 
-def GrnFromAdj(AdjMatrice: npt.ArrayLike,
+def GrnFromAdj(AdjMatrice: np.ndarray,
                resDict: dict = None) -> dict:
     """
     Create a Gene Regulatory Network (GRN) from an adjacency matrix.
@@ -52,16 +57,20 @@ def GrnFromAdj(AdjMatrice: npt.ArrayLike,
 
     Parameters:
     - AdjMatrice (numpy.ndarray): The adjacency matrix representing the GRN.
-    - resDict (dict, optional): A dictionary to store the results.
-    If no dictionary is provided, a new one is created.
+    - resDict (dict, optional): A dictionary to store the results. If no dictionary is provided, a new one is created.
+    # noqa: E501
     Returns:
     - dict: A dictionary containing the generated graph, the number of genes,
     the number of self-regulations, and other characteristics.
     """
     if resDict is None:
         resDict = {}
+
+    # Create directed graph from adjacency matrix
     genesNb = len(AdjMatrice)
     Graph = nx.from_numpy_array(AdjMatrice, create_using=nx.DiGraph)
+
+    # Calculate self-regulation and pairwise regulation rates
     autoRG = 0
     for i in range(genesNb):
         if AdjMatrice[i][i] != 0:
@@ -76,6 +85,8 @@ def GrnFromAdj(AdjMatrice: npt.ArrayLike,
                 duoRG += 1
     autoRG /= Graph.number_of_edges()
     duoRG /= N
+
+    # Add colors and store results
     addColors(Graph, AdjMatrice)
     resDict["Graph"] = Graph
     resDict["genesNb"] = genesNb
@@ -83,6 +94,7 @@ def GrnFromAdj(AdjMatrice: npt.ArrayLike,
     resDict["AdjMatrice"] = AdjMatrice
     resDict["meanClustering"] = meanClustering(Graph)
     resDict["subGraph"] = subgraph3N(Graph)
+
     return resDict
 
 

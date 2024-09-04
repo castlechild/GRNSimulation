@@ -3,7 +3,6 @@
 import networkx as nx
 import random as rd
 import matplotlib.pyplot as plt
-import numpy.typing as npt
 import numpy as np
 
 # Barabasi-Albert algorithm
@@ -11,8 +10,23 @@ import numpy as np
 
 
 def BarabasiAlbertAlgorithm(n: int, an: int) -> nx.graph.Graph:
+    """
+    Generate a random graph using the Barabasi-Albert model.
+
+    This function creates a scale-free network based on preferential
+    attachment.
+
+        Parameters:
+            - n (int): The total number of nodes in the network.
+            - an (int): The number of initial connected nodes in the network.
+
+        Returns:
+            - networkx.Graph: The generated graph.
+    """
     G = nx.Graph()
     G.add_nodes_from(range(an))
+
+    # Create new nodes with edges following the preferential attachment
     for new_node in range(an, n):
         sum_denominator = 2 * G.number_of_edges() + G.number_of_nodes()
         # probabilistic list creation
@@ -22,6 +36,7 @@ def BarabasiAlbertAlgorithm(n: int, an: int) -> nx.graph.Graph:
             s += (G.degree[node]+1) / sum_denominator
             Lprob.append(s)
         G.add_node(new_node)
+
         # new edges determination
         for a in range(an):
             random = rd.random()
@@ -29,6 +44,7 @@ def BarabasiAlbertAlgorithm(n: int, an: int) -> nx.graph.Graph:
             while random > Lprob[final_node]:
                 final_node += 1
             G.add_edge(new_node, final_node)
+
     # connectivity condition
     if nx.is_connected(G):
         return G
@@ -36,32 +52,72 @@ def BarabasiAlbertAlgorithm(n: int, an: int) -> nx.graph.Graph:
         return BarabasiAlbertAlgorithm(n, an)
 
 
-def meanClustering(G: nx.graph.Graph) -> float:
+def meanClustering(G: nx.Graph) -> float:
+    """
+    Calculate the mean clustering coefficient of a graph.
+
+    Parameters:
+    - G (networkx.Graph): The input graph.
+
+    Returns:
+    - float: The mean clustering coefficient.
+    """
     L = list(nx.clustering(G).items())
     return np.mean([L[i][1] for i in range(G.number_of_nodes())])
 
 
-def createLogVerificationScaleFree(G: nx.graph.Graph) -> tuple:
+def createLogVerificationScaleFree(G: nx.Graph) -> tuple:
+    """
+    Generate data for log-log verification of a scale-free network.
+
+    Parameters:
+    - G (networkx.Graph): The input graph.
+
+    Returns:
+    - tuple: Two lists containing log(degree) and log(proportion of nodes
+    with that degree).
+    """
     res = ([], [])
     dicD = {}
     N = G.number_of_nodes()
+
+    # Calculate the degree distribution
     for node in G:
         d = G.degree[node]
         if d not in dicD:
             dicD[d] = 1
         else:
             dicD[d] += 1
+
+    # Calculate log values for scale-free verification
     for d in dicD:
         res[0].append(np.log(d))
         res[1].append(np.log(dicD[d]/N))
+
     return res
 
 
-def adjacenteDiMatriceFromGraph(G: nx.graph.Graph,
+def adjacenteDiMatriceFromGraph(G: nx.Graph,
                                 autoRG: float,
                                 duoRG: float) -> tuple:
+    """
+    Generate a directed graph and adjacency matrix from an undirected graph.
+
+    This function assigns directed edges to an undirected graph based on
+    auto-regulation and duo-regulation rates.
+
+    Parameters:
+    - G (networkx.Graph): The undirected graph.
+    - autoRG (float): The self-regulation rate.
+    - duoRG (float): The duo-regulation rate.
+
+    Returns:
+    - tuple: A directed graph and its adjacency matrix.
+    """
     DiG = nx.DiGraph()
     DiG.add_nodes_from(G)
+
+    # Assign directed edges
     for edge in G.edges():
         rdNumber = rd.random()
         if rdNumber < duoRG:
@@ -72,24 +128,46 @@ def adjacenteDiMatriceFromGraph(G: nx.graph.Graph,
                 DiG.add_edges_from([edge], color='blue')
             else:
                 DiG.add_edges_from([edge[::-1]], color='blue')
+
+    # Assign self-loops
     for node in G:
         rdNumber = rd.random()
         if rdNumber < autoRG:
             DiG.add_edge(node, node, color='gray')
+
+    # Create adjacency matrix and add activations/inhibitions
     M = nx.to_numpy_array(DiG)
     addActivationInhibition(DiG, M)
     return (DiG, M)
 
 
-def adjacenteDiMatriceStaredFromGraph(G: nx.graph.Graph,
+def adjacenteDiMatriceStaredFromGraph(G: nx.Graph,
                                       autoRG: float,
                                       duoRG: float) -> tuple:
+    """
+    Generate a directed graph and adjacency matrix from an undirected graph
+    with a specific starting point.
+
+    This function assigns directed edges to an undirected graph based
+    on auto-regulation and duo-regulation rates,
+    starting from the node with the highest degree.
+
+    Parameters:
+    - G (networkx.Graph): The undirected graph.
+    - autoRG (float): The self-regulation rate.
+    - duoRG (float): The duo-regulation rate.
+
+    Returns:
+    - tuple: A directed graph and its adjacency matrix.
+    """
     DiG = nx.DiGraph()
     DiG.add_nodes_from(G)
     degree_dict = dict(G.degree())
     motherNode = max(degree_dict, key=degree_dict.get)
     distance = nx.shortest_path_length(G, motherNode)
     cache = set()
+
+    # Assign directed edges from the most connected node
     for nodeA in distance:
         for nodeB in G[nodeA]:
             edge = (nodeA, nodeB)
@@ -101,39 +179,63 @@ def adjacenteDiMatriceStaredFromGraph(G: nx.graph.Graph,
                     DiG.add_edges_from((edge, edge[::-1]), color='black')
                 else:
                     DiG.add_edges_from([edge], color='blue')
+        # Assign self-loops
         rdNumber = rd.random()
         if rdNumber < autoRG:
             DiG.add_edge(nodeA, nodeA, color='gray')
+
+    # Create adjacency matrix and add activations/inhibitions
     M = nx.to_numpy_array(DiG)
     addActivationInhibition(DiG, M)
     return (DiG, M)
 
 
-def addActivationInhibition(G: nx.graph.Graph,
-                            M: npt.ArrayLike) -> None:
+def addActivationInhibition(G: nx.Graph,
+                            M: np.ndarray) -> None:
+    """
+    Adds activation or inhibition labels to the graph edges.
+
+    This function randomly assigns activation or inhibition
+    to each edge in the graph.
+
+    Parameters:
+    - G (networkx.Graph): The directed graph.
+    - M (numpy.ndarray): The adjacency matrix of the graph.
+    """
     for u, v in G.edges():
         inhibitionBool = rd.random() < 0.5
         if inhibitionBool:
             M[u][v] *= -1
-            G[u][v]['acInColor'] = 'r'
+            G[u][v]['acInColor'] = 'r'  # Red for inhibition
         else:
-            G[u][v]['acInColor'] = 'g'
+            G[u][v]['acInColor'] = 'g'  # Green for activation
 
 
-def addColors(G: nx.graph.Graph,
-              M: npt.ArrayLike) -> None:
+def addColors(G: nx.Graph,
+              M: np.ndarray) -> None:
+    """
+    Adds colors to the graph edges based on their type.
+
+    This function assigns colors to edges in the graph depending
+    on whether they are self-loops,
+    mutual connections, or one-directional.
+
+    Parameters:
+    - G (networkx.Graph): The directed graph.
+    - M (numpy.ndarray): The adjacency matrix of the graph.
+    """
     for u, v in G.edges():
         if v == u:
-            G[u][v]['color'] = "gray"
+            G[u][v]['color'] = "gray"  # Self-loop
         elif (v, u) in G.edges():
-            G[u][v]['color'] = "black"
+            G[u][v]['color'] = "black"  # Mutual connection
         else:
-            G[u][v]['color'] = "blue"
+            G[u][v]['color'] = "blue"  # One-directional connection
 
         if M[u][v] == 1:
-            G[u][v]["acInColor"] = 'g'
+            G[u][v]["acInColor"] = 'g'  # Green for activation
         else:
-            G[u][v]["acInColor"] = 'r'
+            G[u][v]["acInColor"] = 'r'  # Red for inhibition
 
 ##############################################################################
 

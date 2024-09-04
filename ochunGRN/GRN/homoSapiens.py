@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pkg_resources
 import matplotlib.pyplot as plt
-from genesGroupe import subgraph3N_parallel
+from ochunGRN.GRN.genesGroup import subgraph3N_parallel
 if __name__ == "__main__":
     document = pd.read_excel("ochunGRN/GRN/41598_2021_3625_MOESM5_ESM.xlsx")
 else:

@@ -2,11 +2,6 @@
 import numpy as np
 from noise import stochastiqueNoise
 
-# dG/dt = k * \prod( Hill_inhibition(G_i) * Hill_activation(G_a) )
-# - k_degratation . G
-# Hill_activation(G) = 1 + G^n / (K^n + G^n)
-# Hill_inhibition(G) =  K^n / (K^n + G^n)
-
 
 def HillEquation(t: float,
                  G: np.ndarray,
@@ -17,44 +12,35 @@ def HillEquation(t: float,
                  K_deg: np.ndarray,
                  n: int,
                  noise_amplitude: int | float = 2) -> np.ndarray:
-    r"""
+    """
     Computes the rate of change of gene expression levels based on Hill
     functions for activation and inhibition.
-
     The function calculates the derivative of gene expression levels using
     a system of Hill equations.
     This model incorporates both activation and inhibition effects based
     on the Hill function.
-    :math:`\frac{dG_i}{dt} = k_i \prod_{j}
-    (Hill_{activation}(G_j)^{\text{stateEdge}_{ji}}
-    \cdot Hill_{inhibition}(G_j)^{1 - \text{stateEdge}_{ji}})
-    + K_{synt_i} - K_{deg_i} G_i`
 
-    Where:
+        Parameters:
+            - t (float): The current time point (not used in the calculation).
+            - G (numpy.ndarray): A 1D array of gene expression levels
+            at time t.
+            - Adj (numpy.ndarray): A 2D adjacency matrix representing
+            interactions between genes. `Adj[i][j]` indicates the effect of
+            gene j on gene i (1 for activation, -1 for inhibition).
+            - K (numpy.ndarray): A 1D array of baseline rate constants
+            for each gene.
+            - Ka (numpy.ndarray): A 1D array of Hill constants (Ka)
+            for the activation and inhibition functions.
+            - K_synt (numpy.ndarray): A 1D array of synthesis rate constants
+            for each gene.
+            - K_deg (numpy.ndarray): A 1D array of degradation rate constants
+            for each gene.
+            - n (int): The Hill coefficient, which defines the steepness
+            of the activation/inhibition response.
 
-    - :math:`Hill_{activation}(G_a) = 1 + \frac{G_a^n}{K_a^n + G_a^n}`
-    - :math:`Hill_{inhibition}(G_i) = \frac{K_a^n}{K_a^n + G_i^n}`
-
-    Args:
-        t (float): The current time point (not used in the calculation).
-        G (numpy.ndarray): A 1D array of gene expression levels at time t.
-        Adj (numpy.ndarray): A 2D adjacency matrix representing interactions
-        between genes.
-                             `Adj[i][j]` indicates the effect of gene j
-                             on gene i (1 for activation, -1 for inhibition).
-        K (numpy.ndarray): A 1D array of baseline rate constants for each gene.
-        Ka (numpy.ndarray): A 1D array of Hill constants (Ka) for
-        the activation and inhibition functions.
-        K_synt (numpy.ndarray): A 1D array of synthesis rate constants
-        for each gene.
-        K_deg (numpy.ndarray): A 1D array of degradation rate constants
-        for each gene.
-        n (int): The Hill coefficient, which defines the steepness of
-        the activation/inhibition response.
-
-    Returns:
-        numpy.ndarray: A 1D array where each element represents the rate
-        of change of the corresponding gene's expression level.
+        Returns:
+            numpy.ndarray: A 1D array where each element represents the rate
+            of change of the corresponding gene's expression level.
     """
     del t
     dG = np.zeros(len(G))
@@ -76,10 +62,34 @@ def HillEquation(t: float,
 
 
 def Hill_inhibition(G_i: float, ka: float, n: int) -> float:
+    """
+    Computes the Hill inhibition function value for a given gene
+    expression level.
+
+        Args:
+            - G_i (float): Expression level of the inhibiting gene.
+            - ka (float): Hill constant for inhibition.
+            - n (int): Hill coefficient.
+
+        Returns:
+            float: The value of the Hill inhibition function.
+    """
     return ka**n / (ka**n + G_i**n)
 
 
 def Hill_activation(G_a: float, ka: float, n: int) -> float:
+    """
+    Computes the Hill activation function value for a given gene
+    expression level.
+
+        Args:
+            - G_a (float): Expression level of the activating gene.
+            - ka (float): Hill constant for activation.
+            - n (int): Hill coefficient.
+
+        Returns:
+            float: The value of the Hill activation function.
+    """
     return 1 + (G_a**n / (ka**n + G_a**n))
 
 

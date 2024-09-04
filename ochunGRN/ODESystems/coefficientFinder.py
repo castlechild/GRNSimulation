@@ -16,31 +16,38 @@ def getCoefficient(GenesNb: int) -> dict:
     """
     Extracts random coefficients for a specified number of genes.
 
-    Args:
-        genes_nb (int): The number of genes to extract coefficients for.
+        Parameters:
+            - GenesNb (int): The number of genes to extract coefficients for.
 
-    Returns:
-        dict: A dictionary containing the coefficients.
+        Returns:
+            - dict: A dictionary containing the coefficients.
     """
-    resDict = {}
-    resDict["ProtsDeg"] = []
-    resDict["mRNAsDeg"] = []
-    resDict["TranscriptionsRate"] = []
-    resDict["TranslationsRate"] = []
-    resDict["mRNAAvg"] = []
-    resDict["ProtAvg"] = []
+    resDict = {
+        "ProtsDeg": [],
+        "mRNAsDeg": [],
+        "TranscriptionsRate": [],
+        "TranslationsRate": [],
+        "mRNAAvg": [],
+        "ProtAvg": []
+    }
+
     for i in range(GenesNb):
         randomNb = rd.randint(0, 5027)
         L = document[randomNb].tolist()
+
+        # Ensure that no selected values are NaN for required indices
         while True in pd.isna([L[i] for i in [13, 16, 19, 22, 25, 28]]):
             randomNb = rd.randint(0, 5027)
             L = document[randomNb].tolist()
+
+        # Extract coefficients and calculate necessary values
         resDict["ProtsDeg"].append(np.sqrt(2)/L[19])
         resDict["mRNAsDeg"].append(np.sqrt(2)/L[22])
         resDict["TranscriptionsRate"].append(L[25])
         resDict["TranslationsRate"].append(L[28])
         resDict["mRNAAvg"].append(L[16])
         resDict["ProtAvg"].append(L[13])
+
     return resDict
 
 

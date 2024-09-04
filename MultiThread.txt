@@ -7,7 +7,7 @@ drosophilaMelanogaster:
           ratio FFL : 0.0017457082569766163
 
 
-escherichniaColi:
+escherichiaColi:
    Nombre de noeuds : 1641
    Nombre d'arrêtes : 3555
           Execution : 100%|█| 735 157 060/735 157 060 [18:46<00:00, 652631.30it/s] 

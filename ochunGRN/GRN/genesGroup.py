@@ -6,28 +6,33 @@ import numpy.typing as npt
 
 def findGroupGraph(adj_matrix: npt.ArrayLike) -> str:
     """
-    Identifie le type de sous-graphe à trois nœuds (motif) dans un graphe
-    dirigé en utilisant sa matrice d'adjacence.
+    Identifies the type of three-node subgraph (motif) in a directed graph
+    using its adjacency matrix.
 
-    Cette fonction prend une matrice d'adjacence de sous-graphe à trois nœuds
-    et la classifie en fonction de ses motifs structurels parmi les options
-    suivantes :
-    "Fan-In", "Fan-Out", "Cascade", "FFL", "Triangular", "C-D", "C-E",
-    "SCascade", "dC", "dD", "dE", "5edges", et "6edges".
+    This function takes an adjacency matrix of a three-node subgraph
+    and classifies it based on its structural motifs.
+    The classification includes types such as "Fan-In", "Fan-Out", "Cascade",
+    "FFL", "FBL", "Mutual-Out", "Mutual-In", "Bi-Mutual", "Regulated-Mutual",
+    "Regulating-Mutual", "Mutual-Cascade", "Semi-Clique" and "Clique".
 
-    Paramètres :
-    - adj_matrix (numpy.ndarray): Matrice d'adjacence 3x3 représentant
-    le sous-graphe.
+    Parameters:
+    - adj_matrix (np.ndarray): A 3x3 adjacency matrix representing the subgraph
 
-    Retourne :
-    - str : Le type de motif détecté parmi les options disponibles.
+    Returns:
+    - str: The detected motif type from the available options.
     """
+    # Ensure the matrix is 3x3
     if adj_matrix.shape != (3, 3):
-        raise ValueError("La matrice d'adjacence doit être de taille 3x3.")
+        raise ValueError("The adjacency matrix must be 3x3.")
+
+    # Remove self-loops
     for i in range(3):
         adj_matrix[i, i] = 0
+
+    # Count the number of edges in the subgraph
     nEdges = np.sum(adj_matrix)
 
+    #  Classify the motif based on the number of edges
     if nEdges == 2:
         for i in range(3):
             if np.sum(adj_matrix[:, i]) == 2:
@@ -42,45 +47,61 @@ def findGroupGraph(adj_matrix: npt.ArrayLike) -> str:
                 if i != j and adj_matrix[i, j] == 0 and adj_matrix[j, i] == 0:
                     if (np.sum(adj_matrix[:, i]) == 1 and
                             np.sum(adj_matrix[:, j]) == 1):
-                        return "C-D"
+                        return "Mutual-Out"
                     else:
-                        return "C-E"
+                        return "Mutual-In"
         for i in range(3):
             if np.sum(adj_matrix[:, i]) == 2:
                 return "FFL"
-        return "Triangular"
+        return "FBL"
 
     elif nEdges == 4:
         for i in range(3):
             for j in range(3):
                 if i != j and adj_matrix[i, j] == 0 and adj_matrix[j, i] == 0:
-                    return "SCascade"
+                    return "Bi-Mutual"
         for i in range(3):
             if np.sum(adj_matrix[i, :]) + np.sum(adj_matrix[:, i]) == 2:
                 if np.sum(adj_matrix[:, i]) == 2:
-                    return "dE"
+                    return "Regulated-Mutual"
                 elif np.sum(adj_matrix[i, :]) == 2:
-                    return "dD"
-                return "dC"
+                    return "Regulating-Mutual"
+                return "Mutual-Cascade"
         raise ValueError("Motif non classifié pour nEdges = 4")
 
     elif nEdges == 5:
-        return "5edges"
+        return "Semi-Clique"
 
     elif nEdges == 6:
-        return "6edges"
+        return "Clique"
 
     raise ValueError("Motif non classifié")
 
 
 def subgraph3N(Graph: nx.digraph.DiGraph) -> dict:
+    """
+    Identifies all three-node subgraphs (motifs) in a directed graph.
+
+    This function takes a directed graph, finds all three-node subgraphs,
+    and classifies each based on its motif type.
+
+    Parameters:
+    - Graph (networkx.DiGraph): A directed graph to analyze.
+
+    Returns:
+    - dict: A dictionary where keys are triplets of nodes and values are
+    the detected motif type.
+    """
     resDic = {}
     nodes = list(Graph.nodes)
     edges = list(Graph.edges)
     adj_matrice = nx.to_numpy_array(Graph)
+    # the creation of undi matrice is use for finding connected subgraph
     adj_matrice_undi = np.zeros(np.shape(adj_matrice))
     DictPos = {}
     cache = set()
+
+    # Create adjacency matrices for directed and undirected graphs
     for i in range(len(nodes)):
         DictPos[nodes[i]] = i
         for j in range(len(nodes)):
@@ -88,6 +109,8 @@ def subgraph3N(Graph: nx.digraph.DiGraph) -> dict:
                 adj_matrice[i][j] = 1
                 adj_matrice_undi[i][j] = 1
                 adj_matrice_undi[j][i] = 1
+
+    # Identify all three-node subgraphs
     for u, v in edges:
         for w in set(Graph[v]).union(Graph.pred[v], Graph[u], Graph.pred[u]):
             if u != v != w != u:
@@ -108,6 +131,18 @@ def issubgraphconnected(adj_matrice: npt.ArrayLike,
                         nodeEdgeA: int,
                         nodeEdgeB: int,
                         node: int) -> bool:
+    """
+    Checks if a three-node subgraph is connected. (knowing an edge)
+
+    Parameters:
+    - adj_matrice (numpy.ndarray): Adjacency matrix of the graph.
+    - nodeEdgeA (int): Index of the first edge node.
+    - nodeEdgeB (int): Index of the second edge node.
+    - node (int): Index of a third node.
+
+    Returns:
+    - bool: True if the subgraph is connected, False otherwise.
+    """
     return bool(adj_matrice[node][nodeEdgeA]) or bool(adj_matrice[node][nodeEdgeB])  # noqa: E501
 
 
@@ -151,9 +186,12 @@ def main():
         plt.subplot(3, 5, i+11)
         nx.draw_circular(TGraph[i+8], arrowsize=30)
         plt.title(findGroupGraph(nx.to_numpy_array(TGraph[i+8])))
+    plt.suptitle("13 types of 3-nodes subgraphs")
+    plt.suptitle("An introduction to systems biology (Alon 2019)",
+                 fontsize=20, x=0.8, y=0.08)
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
-    plt.savefig("Melvin/Images/allGroups.png")
+    plt.savefig("images/allGroups.png")
 
 
 if __name__ == "__main__":
