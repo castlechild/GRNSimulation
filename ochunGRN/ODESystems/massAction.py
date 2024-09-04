@@ -4,21 +4,11 @@ from noise import stochastiqueNoise
 # from noise import stochastiqueNoise
 
 
-def MaMatrice(M, K):
-    MaPlus = np.abs(M) * K
-    MaMinus = np.dot(-np.ones(np.shape(M)), MaPlus)
-    MaMinus = np.diag(np.diag(MaMinus))
-    # print("minus:",MaMinus)
-    # print("plus:",MaPlus)
-    return MaPlus + MaMinus
-
-
-def massAction(t, G, A):
-    del t
-    return np.dot(A, G)
-
-
-def massAction2(t, G, Adj, k, noise_amplitude=2):
+def massAction(t: float,
+               G: np.ndarray,
+               Adj: np.ndarray,
+               k: np.ndarray,
+               noise_amplitude: int | float = 2) -> np.ndarray:
     del t
     genesNb = len(G)
     dG = np.zeros(genesNb)
@@ -30,7 +20,7 @@ def massAction2(t, G, Adj, k, noise_amplitude=2):
                 production += G[j]*k[j]
             stateEdgedeg = Adj[i][j]
             if stateEdgedeg != 0:
-                degradation += G[i]*k[j]
+                degradation += G[i]*k[i]
         dG[i] = production - degradation
         noise = stochastiqueNoise(production, degradation, noise_amplitude)
         dG[i] += noise
@@ -40,11 +30,7 @@ def massAction2(t, G, Adj, k, noise_amplitude=2):
 
 
 def main():
-    Ma = np.random.randint(2, size=(3, 3))
-    K = np.random.random((3, 3))
-    print(Ma)
-    print(K)
-    print(MaMatrice(Ma, K))
+    pass
 
 
 if __name__ == "__main__":

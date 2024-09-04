@@ -2,9 +2,13 @@ from GRNCreationUtils import meanClustering, BarabasiAlbertAlgorithm
 from GRNCreationUtils import adjacenteDiMatriceStaredFromGraph, addColors
 from genesGroupe import subgraph3N
 import networkx as nx
+import numpy.typing as npt
 
 
-def randomGrn(genesNb: int, autoRG: float, duoRG: float, resDict: dict = None):
+def randomGrn(genesNb: int,
+              autoRG: float,
+              duoRG: float,
+              resDict: dict | None = None) -> dict:
     """
     Generate a random Gene Regulatory Network (GRN).
 
@@ -37,7 +41,8 @@ def randomGrn(genesNb: int, autoRG: float, duoRG: float, resDict: dict = None):
     return resDict
 
 
-def GrnFromAdj(AdjMatrice, resDict: dict = None):
+def GrnFromAdj(AdjMatrice: npt.ArrayLike,
+               resDict: dict = None) -> dict:
     """
     Create a Gene Regulatory Network (GRN) from an adjacency matrix.
 

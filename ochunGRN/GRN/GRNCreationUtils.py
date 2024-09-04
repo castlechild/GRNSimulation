@@ -3,13 +3,14 @@
 import networkx as nx
 import random as rd
 import matplotlib.pyplot as plt
+import numpy.typing as npt
 import numpy as np
 
 # Barabasi-Albert algorithm
 # Ma = np.zeros((genesNb,genesNb))
 
 
-def BarabasiAlbertAlgorithm(n, an):
+def BarabasiAlbertAlgorithm(n: int, an: int) -> nx.graph.Graph:
     G = nx.Graph()
     G.add_nodes_from(range(an))
     for new_node in range(an, n):
@@ -35,12 +36,12 @@ def BarabasiAlbertAlgorithm(n, an):
         return BarabasiAlbertAlgorithm(n, an)
 
 
-def meanClustering(G):
+def meanClustering(G: nx.graph.Graph) -> float:
     L = list(nx.clustering(G).items())
     return np.mean([L[i][1] for i in range(G.number_of_nodes())])
 
 
-def createLogVerificationScaleFree(G):
+def createLogVerificationScaleFree(G: nx.graph.Graph) -> tuple:
     res = ([], [])
     dicD = {}
     N = G.number_of_nodes()
@@ -56,7 +57,9 @@ def createLogVerificationScaleFree(G):
     return res
 
 
-def adjacenteDiMatriceFromGraph(G, autoRG, duoRG):
+def adjacenteDiMatriceFromGraph(G: nx.graph.Graph,
+                                autoRG: float,
+                                duoRG: float) -> tuple:
     DiG = nx.DiGraph()
     DiG.add_nodes_from(G)
     for edge in G.edges():
@@ -78,7 +81,9 @@ def adjacenteDiMatriceFromGraph(G, autoRG, duoRG):
     return (DiG, M)
 
 
-def adjacenteDiMatriceStaredFromGraph(G, autoRG, duoRG):
+def adjacenteDiMatriceStaredFromGraph(G: nx.graph.Graph,
+                                      autoRG: float,
+                                      duoRG: float) -> tuple:
     DiG = nx.DiGraph()
     DiG.add_nodes_from(G)
     degree_dict = dict(G.degree())
@@ -104,7 +109,8 @@ def adjacenteDiMatriceStaredFromGraph(G, autoRG, duoRG):
     return (DiG, M)
 
 
-def addActivationInhibition(G, M):
+def addActivationInhibition(G: nx.graph.Graph,
+                            M: npt.ArrayLike) -> None:
     for u, v in G.edges():
         inhibitionBool = rd.random() < 0.5
         if inhibitionBool:
@@ -114,7 +120,8 @@ def addActivationInhibition(G, M):
             G[u][v]['acInColor'] = 'g'
 
 
-def addColors(G, M):
+def addColors(G: nx.graph.Graph,
+              M: npt.ArrayLike) -> None:
     for u, v in G.edges():
         if v == u:
             G[u][v]['color'] = "gray"

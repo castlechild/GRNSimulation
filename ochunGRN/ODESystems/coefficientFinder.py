@@ -12,7 +12,7 @@ Attribut = document.columns.tolist()
 document = document.T
 
 
-def getCoefficient(GenesNb):
+def getCoefficient(GenesNb: int) -> dict:
     """
     Extracts random coefficients for a specified number of genes.
 

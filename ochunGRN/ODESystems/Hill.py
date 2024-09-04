@@ -8,7 +8,15 @@ from noise import stochastiqueNoise
 # Hill_inhibition(G) =  K^n / (K^n + G^n)
 
 
-def HillEquation(t, G, Adj, K, Ka, K_synt, K_deg, n, noise_amplitude=2):
+def HillEquation(t: float,
+                 G: np.ndarray,
+                 Adj: np.ndarray,
+                 K: np.ndarray,
+                 Ka: np.ndarray,
+                 K_synt: np.ndarray,
+                 K_deg: np.ndarray,
+                 n: int,
+                 noise_amplitude: int | float = 2) -> np.ndarray:
     r"""
     Computes the rate of change of gene expression levels based on Hill
     functions for activation and inhibition.
@@ -67,11 +75,11 @@ def HillEquation(t, G, Adj, K, Ka, K_synt, K_deg, n, noise_amplitude=2):
     return dG
 
 
-def Hill_inhibition(G_i, ka, n):
+def Hill_inhibition(G_i: float, ka: float, n: int) -> float:
     return ka**n / (ka**n + G_i**n)
 
 
-def Hill_activation(G_a, ka, n):
+def Hill_activation(G_a: float, ka: float, n: int) -> float:
     return 1 + (G_a**n / (ka**n + G_a**n))
 
 

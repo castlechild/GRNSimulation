@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 import numpy as np
 from scipy.integrate import solve_ivp
+from extensisq import BS5
 from coefficientFinder import getCoefficient
-from massAction import MaMatrice, massAction, massAction2
+from massAction import massAction
 from Hill import HillEquation
 from indirect import indirect
 from noise import physicalNoise, dropOut, dataSelector
 
 
 def simulationODEs(GenesDict: dict,
-                   ODEs: any,
+                   ODEs: list | tuple | str,
                    T: tuple,
                    Coeff: dict | None = None,
-                   normalisationBool: bool = False):
+                   **kwargs) -> None:
     """
     Simulate the temporal evolution of a gene regulatory network using
     ordinary differential equations (ODEs).
@@ -36,8 +37,13 @@ def simulationODEs(GenesDict: dict,
     Returns:
     - None: The simulation results are stored in `GenesDict`.
 """
+    stochasticNoiseAmplitude = kwargs.get("stochasticNoiseAmplitude", 0.2)
+    physicalNoiseAmplitude = kwargs.get("physicalNoiseAmplitude", 0.2)
+    normalisationBool = kwargs.get("normalisationBool", False)
+    dropOutRate = kwargs.get("dropOutRate", 0.02)
+    timeMeasuresNbMax = kwargs.get("timeMeasuresNbMax", 200)
 
-    def otherODE(L: list):
+    def otherODE(L: list) -> bool:
         """
         Check if the list of ODEs contains elements other than
         the supported models.
@@ -69,75 +75,97 @@ def simulationODEs(GenesDict: dict,
     GenesDict["Coefficients"] = Coeff
     GenesDict["ODEs"] = ODEs
     if "massAction" in ODEs:
-        RatioCoeff = [Coeff["TranscriptionsRate"][i]/Coeff["mRNAAvg"][i]
-                      for i in range(genesNb)]
-        K = np.resize(RatioCoeff, (genesNb, genesNb))
-        Ma = MaMatrice(np.transpose(M), K)
-
-        def equation(t, G): return massAction(t, G, Ma)
-        solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        dataY, dataX = dataSelector(solution.y, solution.t, 200)
-        physicalNoise(dataY, 0)
-        if normalisationBool:
-            normalisation(dataY)
-        dropOut(dataY, 0.02)
-        GenesDict["massActionY"] = dataY
-        GenesDict["massActionX"] = dataX
-
-    if "massAction" in ODEs:
-        GenesDict["ODEs"].append("massAction2")
+        stochasticNoiseAmplitudeMA = kwargs.get("stochasticNoiseAmplitudeMA",
+                                                stochasticNoiseAmplitude)
+        physicalNoiseAmplitudeMA = kwargs.get("physicalNoiseAmplitudeMA",
+                                              physicalNoiseAmplitude)
+        normalisationBoolMA = kwargs.get("normalisationBoolMA",
+                                         normalisationBool)
+        dropOutRateMA = kwargs.get("dropOutRateMA", dropOutRate)
+        timeMeasuresNbMaxMA = kwargs.get("timeMeasuresNbMaxMa",
+                                         timeMeasuresNbMax)
         K = [Coeff["TranscriptionsRate"][i]/Coeff["mRNAAvg"][i]
              for i in range(genesNb)]
 
-        def equation(t, G): return massAction2(t, G, M, K, 0)
-        solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        dataY, dataX = dataSelector(solution.y, solution.t, 200)
-        physicalNoise(dataY, 0)
-        if normalisationBool:
+        def equation(t: float, G: np.ndarray) -> np.ndarray:
+            return massAction(t, G, M, K, stochasticNoiseAmplitudeMA)
+        solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5, method=BS5)
+        dataY, dataX = dataSelector(solution.y, solution.t,
+                                    timeMeasuresNbMaxMA)
+        physicalNoise(dataY, physicalNoiseAmplitudeMA)
+        if normalisationBoolMA:
             normalisation(dataY)
-        dropOut(dataY, 0.02)
-        GenesDict["massAction2Y"] = dataY
-        GenesDict["massAction2X"] = dataX
+        dropOut(dataY, dropOutRateMA)
+        GenesDict["massActionY"] = dataY
+        GenesDict["massActionX"] = dataX
 
     if "Hill" in ODEs:
+        stochasticNoiseAmplitudeHI = kwargs.get("stochasticNoiseAmplitudeHI",
+                                                stochasticNoiseAmplitude)
+        physicalNoiseAmplitudeHI = kwargs.get("physicalNoiseAmplitudeHI",
+                                              physicalNoiseAmplitude)
+        normalisationBoolHI = kwargs.get("normalisationBoolHI",
+                                         normalisationBool)
+        dropOutRateHI = kwargs.get("dropOutRateHI", dropOutRate)
+        timeMeasuresNbMaxHI = kwargs.get("timeMeasuresNbMaxHI",
+                                         timeMeasuresNbMax)
         K = Coeff["TranscriptionsRate"]
         Kdeg = Coeff["mRNAsDeg"]
 
-        def equation(t, G):
-            return HillEquation(t, G, M, K, G0, [0]*genesNb, Kdeg, 2)
-        solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5)
-        dataY, dataX = dataSelector(solution.y, solution.t, 200)
-        physicalNoise(dataY, 0.5)
-        if normalisationBool:
+        def equation(t: float, G: np.ndarray) -> np.ndarray:
+            return HillEquation(t, G, M, K, G0,
+                                [0]*genesNb, Kdeg, 2,
+                                stochasticNoiseAmplitudeHI)
+        solution = solve_ivp(equation, [t0, tf], G0, max_step=0.5, method=BS5)
+        dataY, dataX = dataSelector(solution.y, solution.t,
+                                    timeMeasuresNbMaxHI)
+        physicalNoise(dataY, physicalNoiseAmplitudeHI)
+        if normalisationBoolHI:
             normalisation(dataY)
-        dropOut(dataY, 0.02)
+        dropOut(dataY, dropOutRateHI)
         GenesDict["HillY"] = dataY
         GenesDict["HillX"] = dataX
 
     if "indirect" in ODEs:
-        k_P = Coeff["TranslationsRate"]
-        Ka_P = G0
-        k_mRNA = Coeff["TranscriptionsRate"]
-        K_degP = Coeff["ProtsDeg"]
-        K_degMRNA = Coeff["mRNAsDeg"]
+        stochasticNoiseAmplitudeIN = kwargs.get("stochasticNoiseAmplitudeIN",
+                                                stochasticNoiseAmplitude)
+        physicalNoiseAmplitudeIN = kwargs.get("physicalNoiseAmplitudeIN",
+                                              physicalNoiseAmplitude)
+        normalisationBoolIN = kwargs.get("normalisationBoolIN",
+                                         normalisationBool)
+        dropOutRateIN = kwargs.get("dropOutRateIN", dropOutRate)
+        timeMeasuresNbMaxIN = kwargs.get("timeMeasuresNbMaxIN",
+                                         timeMeasuresNbMax)
+        kTranslation = Coeff["TranslationsRate"]
+        mRNAavg = G0
+        kTranscription = Coeff["TranscriptionsRate"]
+        degP = Coeff["ProtsDeg"]
+        degmRNA = Coeff["mRNAsDeg"]
+        Pavg = Coeff["ProtAvg"]
 
-        def equation(t, G):
+        def equation(t: float, G: np.ndarray) -> np.ndarray:
             mRNA = G[:genesNb]
             P = G[genesNb:]
-            return indirect(t, mRNA, P, M, k_mRNA, k_P,
-                            Ka_P, K_degP, K_degMRNA, 2)
+            return indirect(t, mRNA, P, M, kTranscription,
+                            kTranslation, degP, degmRNA,
+                            Pavg, mRNAavg, 2, stochasticNoiseAmplitudeIN)
         G0_indirect = np.concatenate((G0, Coeff["ProtAvg"]))
-        solution = solve_ivp(equation, [t0, tf], G0_indirect, max_step=0.5)
-        dataY, dataX = dataSelector(solution.y[:genesNb], solution.t, 200)
-        physicalNoise(dataY, 20)
-        if normalisationBool:
+        solution = solve_ivp(equation, [t0, tf], G0_indirect,
+                             max_step=0.5, method=BS5)
+        dataY, dataX = dataSelector(solution.y[:genesNb], solution.t,
+                                    timeMeasuresNbMaxIN)
+        dataProt = dataSelector(solution.y[genesNb:], solution.t,
+                                timeMeasuresNbMaxIN)[0]
+        physicalNoise(dataY, physicalNoiseAmplitudeIN)
+        if normalisationBoolIN:
             normalisation(dataY)
-        dropOut(dataY, 0.02)
+        dropOut(dataY, dropOutRateIN)
         GenesDict["indirectY"] = dataY
         GenesDict["indirectX"] = dataX
+        GenesDict["indirectProt"] = dataProt
 
 
-def normalisation(YLists):
+def normalisation(YLists: np.ndarray) -> None:
     """
     Normalize the lists of values by dividing each element by the maximum
     of its respective list.

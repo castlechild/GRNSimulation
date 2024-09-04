@@ -28,13 +28,13 @@ saccharomycesCerevisiae = (document["Unnamed: 8"].tolist()[2:],
                            "Saccharomyces cerevisiae")
 
 
-def nanDestructor(species):
+def nanDestructor(species: list) -> None:
     while type(species[0][-1]) is not str:
         species[0].pop()
         species[1].pop()
 
 
-def graphCreator(species):
+def graphCreator(species: list) -> nx.digraph.DiGraph:
     N = len(species[0])
     Graph = nx.DiGraph()
     for i in range(N):
@@ -42,7 +42,7 @@ def graphCreator(species):
     return Graph
 
 
-def findAutoRegulationGenes(species):
+def findAutoRegulationGenes(species: list) -> tuple:
     AutoRegulationGenes = []
     N = len(species[0])
     for i in range(N):
@@ -51,7 +51,7 @@ def findAutoRegulationGenes(species):
     return (AutoRegulationGenes, len(AutoRegulationGenes)/len(species[0]))
 
 
-def findDoubleRegulationGenes(GSpecies):
+def findDoubleRegulationGenes(GSpecies: nx.digraph.DiGraph) -> tuple:
     DoubleRegulationGenes = []
     for nodeA in GSpecies:
         for nodeB in GSpecies.successors(nodeA):
@@ -61,7 +61,7 @@ def findDoubleRegulationGenes(GSpecies):
             len(DoubleRegulationGenes)/GSpecies.number_of_edges())
 
 
-def FFLratio(Gspecies):
+def FFLratio(Gspecies: nx.digraph.DiGraph) -> None:
     print(Gspecies.number_of_nodes(), Gspecies.number_of_edges())
     print(nx.is_weakly_connected(Gspecies))
     DictFFL = subgraph3N_parallel(Gspecies)
@@ -74,7 +74,8 @@ def FFLratio(Gspecies):
     print(motifs['FFL']/N)
 
 
-def autoRegDistribution(Gspecies, GroupNb):
+def autoRegDistribution(Gspecies: nx.digraph.DiGraph,
+                        GroupNb: int) -> None:
     Dictauto = {}
     Dicttot = {}
     degree = list(Gspecies.degree())
@@ -109,7 +110,7 @@ def autoRegDistribution(Gspecies, GroupNb):
     plt.show()
 
 
-def node10Degree(Gspecies):
+def node10Degree(Gspecies: nx.digraph.DiGraph) -> list:
     res = []
     for node in Gspecies:
         if Gspecies.degree(node) > 10:

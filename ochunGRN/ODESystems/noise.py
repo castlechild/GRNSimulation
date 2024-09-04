@@ -3,14 +3,17 @@ import numpy as np
 import random as rd
 
 
-def stochastiqueNoise(production, degradation, noise_amplitude):
+def stochastiqueNoise(production: float,
+                      degradation: float,
+                      noise_amplitude: int | float) -> float:
     return noise_amplitude * (
         np.sqrt(np.abs(production)) * np.random.normal()
         + np.sqrt(np.abs(degradation)) * np.random.normal()
         )
 
 
-def physicalNoise(concentrationsList, noise_amplitude):
+def physicalNoise(concentrationsList: np.ndarray,
+                  noise_amplitude: int | float) -> None:
     geneNB = len(concentrationsList)
     for gene in range(geneNB):
         valuesNB = len(concentrationsList[gene])
@@ -22,7 +25,7 @@ def physicalNoise(concentrationsList, noise_amplitude):
                 concentrationsList[gene][value] = 0
 
 
-def dropOut(concentrationsList, droupOutRate):
+def dropOut(concentrationsList: np.ndarray, droupOutRate: float) -> None:
     geneNB = len(concentrationsList)
     for gene in range(geneNB):
         valuesNB = len(concentrationsList[gene])
@@ -31,7 +34,9 @@ def dropOut(concentrationsList, droupOutRate):
                 concentrationsList[gene][value] = 0
 
 
-def dataSelector(concentrationsList, timeList, dataNB):
+def dataSelector(concentrationsList: np.ndarray,
+                 timeList: np.ndarray,
+                 dataNB: int) -> np.ndarray:
     geneNB = len(concentrationsList)
     res = ([[] for _ in range(geneNB)], [])
     valuesNB = len(timeList)

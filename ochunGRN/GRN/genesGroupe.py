@@ -1,9 +1,10 @@
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
+import numpy.typing as npt
 
 
-def findGroupGraph(adj_matrix):
+def findGroupGraph(adj_matrix: npt.ArrayLike) -> str:
     """
     Identifie le type de sous-graphe à trois nœuds (motif) dans un graphe
     dirigé en utilisant sa matrice d'adjacence.
@@ -72,7 +73,7 @@ def findGroupGraph(adj_matrix):
     raise ValueError("Motif non classifié")
 
 
-def subgraph3N(Graph):
+def subgraph3N(Graph: nx.digraph.DiGraph) -> dict:
     resDic = {}
     nodes = list(Graph.nodes)
     edges = list(Graph.edges)
@@ -87,7 +88,6 @@ def subgraph3N(Graph):
                 adj_matrice[i][j] = 1
                 adj_matrice_undi[i][j] = 1
                 adj_matrice_undi[j][i] = 1
-    print(edges)
     for u, v in edges:
         for w in set(Graph[v]).union(Graph.pred[v], Graph[u], Graph.pred[u]):
             if u != v != w != u:
@@ -104,7 +104,10 @@ def subgraph3N(Graph):
     return resDic
 
 
-def issubgraphconnected(adj_matrice, nodeEdgeA, nodeEdgeB, node):
+def issubgraphconnected(adj_matrice: npt.ArrayLike,
+                        nodeEdgeA: int,
+                        nodeEdgeB: int,
+                        node: int) -> bool:
     return bool(adj_matrice[node][nodeEdgeA]) or bool(adj_matrice[node][nodeEdgeB])  # noqa: E501
 
 

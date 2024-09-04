@@ -2,7 +2,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def plotGraph(GenesDict, actInhPlotBool=False, saveName=None):
+def plotGraph(GenesDict: dict,
+              actInhPlotBool: bool = False,
+              saveName: str = None) -> None:
     """
     Plot the Gene Regulatory Network (GRN) graph from the provided
     gene dictionary.
@@ -43,7 +45,9 @@ def plotGraph(GenesDict, actInhPlotBool=False, saveName=None):
         plt.savefig(saveName)
 
 
-def plotSim(GenesDict, ODEs=None, saveName=None):
+def plotSim(GenesDict: dict,
+            ODEs: list = None,
+            saveName: str = None) -> None:
     """
     Plot the simulation results of the ODEs for the gene regulatory network.
 
@@ -74,6 +78,26 @@ def plotSim(GenesDict, ODEs=None, saveName=None):
         plt.xlabel("time (h)", fontdict=font)
         plt.ylabel("mRNA concentrations", fontdict=font)
         plt.title(f"{ODEs[i]} law simulation")
+    labels = []
+    for solGenes in range(genesNb):
+        labels.append(f"Gene {solGenes}")
+    handles, _ = plt.gca().get_legend_handles_labels()
+    plt.figlegend(handles, labels, loc='upper right')
+    if saveName is not None:
+        plt.savefig(saveName)
+
+
+def plotProt(GenesDict, saveName=None):
+    if "indirect" not in GenesDict["ODEs"]:
+        raise
+    genesNb = GenesDict["genesNb"]
+    font = {'family': 'serif', 'color': 'darkred', 'size': 8}
+    for solGenes in range(genesNb):
+        plt.plot(GenesDict["indirectX"],
+                 GenesDict["indirectProt"][solGenes], label=solGenes)
+        plt.xlabel("time (h)", fontdict=font)
+        plt.ylabel("protein concentrations", fontdict=font)
+        plt.title("protein concentrations from indirect law simulation")
     labels = []
     for solGenes in range(genesNb):
         labels.append(f"Gene {solGenes}")
