@@ -191,7 +191,7 @@ def main():
                  fontsize=20, x=0.8, y=0.08)
     manager = plt.get_current_fig_manager()
     manager.full_screen_toggle()
-    plt.savefig("images/allGroups.png")
+    plt.show()
 
 
 if __name__ == "__main__":

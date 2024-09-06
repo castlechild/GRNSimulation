@@ -41,8 +41,8 @@ def getCoefficient(GenesNb: int) -> dict:
             L = document[randomNb].tolist()
 
         # Extract coefficients and calculate necessary values
-        resDict["ProtsDeg"].append(np.sqrt(2)/L[19])
-        resDict["mRNAsDeg"].append(np.sqrt(2)/L[22])
+        resDict["ProtsDeg"].append(np.log(2)/L[19])
+        resDict["mRNAsDeg"].append(np.log(2)/L[22])
         resDict["TranscriptionsRate"].append(L[25])
         resDict["TranslationsRate"].append(L[28])
         resDict["mRNAAvg"].append(L[16])
