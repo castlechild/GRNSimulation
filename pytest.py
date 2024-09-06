@@ -13,6 +13,7 @@ def print_my_list(title_list, title_dict, *my_list, **my_dict):
     # Dans ce namespace, my_dict est un dictionnaire et my_list une liste
 
     print('ici les elements de la liste %s' % (title_list))
+    print(my_list)
     for idx, value in enumerate(my_list):
         print('Index %02d: %s' % (idx, value))
 
@@ -21,7 +22,7 @@ def print_my_list(title_list, title_dict, *my_list, **my_dict):
         print('Element %s: %s' % (key, value))
 
 
-print_my_list('liste 0', 'dict 0', 0, 1, 2, 3,
+print_my_list('liste 0', 'dict 0', 0,
               zero=0, un=1, deux=2, trois=3, quatre=4, cinq=5)
 
 
@@ -32,3 +33,5 @@ print(fonction(5, 3, **args))
 G = nx.Graph()
 G.add_edge(0, 1)
 print(type(G))
+
+print((5,))
